@@ -357,6 +357,8 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
 
         <div className="flex flex-col sm:flex-row gap-2">
           <input
+            id="solana-verification-input"
+            name="solanaTxSignature"
             type="text"
             value={verificationInput}
             onChange={(e) => setVerificationInput(e.target.value)}

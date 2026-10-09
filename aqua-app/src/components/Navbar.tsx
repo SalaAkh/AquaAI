@@ -120,6 +120,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Farm Profile Dropdown */}
             <div className="relative">
               <select
+                id="navbar-active-farm-select"
+                name="activeFarmSelect"
                 aria-label="Select Active Farm"
                 value={currentFarm.id}
                 onChange={(e) => {

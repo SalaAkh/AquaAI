@@ -108,8 +108,12 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
           {/* Farm Name */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Farm / Field Name</label>
+            <label htmlFor="farm-name" className="block text-xs font-semibold text-slate-700 mb-1">
+              Farm / Field Name
+            </label>
             <input
+              id="farm-name"
+              name="farmName"
               type="text"
               required
               value={name}
@@ -122,7 +126,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
           {/* Location Presets in Kazakhstan / Central Asia */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold text-slate-700">
+              <label htmlFor="farm-location" className="block text-xs font-semibold text-slate-700">
                 Location in Kazakhstan & Central Asia
               </label>
               <span className="text-[11px] text-slate-500">
@@ -130,6 +134,8 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
               </span>
             </div>
             <select
+              id="farm-location"
+              name="farmLocation"
               value={selectedLocationId}
               onChange={(e) => setSelectedLocationId(e.target.value)}
               className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer"
@@ -149,11 +155,13 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
           {/* Field Size & Crop Selection Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label htmlFor="farm-field-size" className="block text-xs font-semibold text-slate-700 mb-1">
                 Field Size (Hectares)
               </label>
               <div className="relative">
                 <input
+                  id="farm-field-size"
+                  name="fieldSizeHectares"
                   type="number"
                   min="0.5"
                   step="0.5"
@@ -169,8 +177,12 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Crop Type</label>
+              <label htmlFor="farm-crop-type" className="block text-xs font-semibold text-slate-700 mb-1">
+                Crop Type
+              </label>
               <select
+                id="farm-crop-type"
+                name="cropType"
                 value={cropType}
                 onChange={(e) => setCropType(e.target.value as CropType)}
                 className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer capitalize"
@@ -216,10 +228,12 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
           {/* Irrigation Method & Efficiency */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label htmlFor="farm-irrigation-method" className="block text-xs font-semibold text-slate-700 mb-1">
                 Irrigation Delivery Method
               </label>
               <select
+                id="farm-irrigation-method"
+                name="irrigationMethod"
                 value={irrigationMethod}
                 onChange={(e) => setIrrigationMethod(e.target.value as IrrigationMethod)}
                 className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer"
@@ -234,8 +248,12 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Soil Texture Type</label>
+              <label htmlFor="farm-soil-type" className="block text-xs font-semibold text-slate-700 mb-1">
+                Soil Texture Type
+              </label>
               <select
+                id="farm-soil-type"
+                name="soilType"
                 value={soilType}
                 onChange={(e) => setSoilType(e.target.value as SoilType)}
                 className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer"
