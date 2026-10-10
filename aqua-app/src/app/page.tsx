@@ -8,12 +8,14 @@ import { IrrigationCalculatorCard } from '@/components/IrrigationCalculatorCard'
 import { AiAdvisorCard } from '@/components/AiAdvisorCard';
 import { WaterAnalyticsChart } from '@/components/WaterAnalyticsChart';
 import { SolanaVerifierCard } from '@/components/SolanaVerifierCard';
+import { WaterSubsidiesCard } from '@/components/WaterSubsidiesCard';
 import { CentralAsiaChallenge } from '@/components/CentralAsiaChallenge';
 import { FarmManagerModal } from '@/components/FarmManagerModal';
 import { DailyWeatherForecast, FarmProfile, IrrigationRecommendation, OnChainProof } from '@/lib/types';
 import { DEMO_FARM_TURKISTAN } from '@/lib/constants';
 import { calculateIrrigationRecommendation } from '@/lib/fao56';
 import { fetchOpenMeteoForecast, generateCentralAsiaFallbackForecast } from '@/lib/weather';
+import { LanguageProvider, useTranslation } from '@/lib/i18n';
 import {
   getActiveFarmId,
   getSavedFarms,
@@ -33,10 +35,11 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-export default function HomePage() {
+function DashboardApp() {
+  const { t } = useTranslation();
   const [farms, setFarms] = useState<FarmProfile[]>([DEMO_FARM_TURKISTAN]);
   const [currentFarm, setCurrentFarm] = useState<FarmProfile>(DEMO_FARM_TURKISTAN);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'blockchain' | 'about'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'blockchain' | 'subsidies' | 'about'>('dashboard');
   const [showLandingHero, setShowLandingHero] = useState<boolean>(true);
   const [isFarmModalOpen, setIsFarmModalOpen] = useState<boolean>(false);
   const [editingFarm, setEditingFarm] = useState<FarmProfile | undefined>(undefined);
@@ -160,18 +163,18 @@ export default function HomePage() {
         <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-lg border border-sky-100">
-              {currentFarm.cropType === 'cotton' ? '🌱' : currentFarm.cropType === 'wheat' ? '🌾' : '🌽'}
+              {currentFarm.cropType === 'cotton' ? '🌱' : currentFarm.cropType === 'wheat' ? '🌾' : currentFarm.cropType === 'rice' ? '🌾' : '🌽'}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold text-slate-900">{currentFarm.name}</h1>
                 {currentFarm.isDemo ? (
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-                    Demo Farm
+                    {t.demoFarmBadge}
                   </span>
                 ) : (
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                    Active Production
+                    {t.activeProdBadge}
                   </span>
                 )}
               </div>
@@ -179,7 +182,7 @@ export default function HomePage() {
                 <MapPin className="w-3.5 h-3.5 text-slate-400" />
                 <span>{currentFarm.region}</span>
                 <span>•</span>
-                <span>{currentFarm.fieldSizeHectares} Hectares</span>
+                <span>{currentFarm.fieldSizeHectares} {t.hectares}</span>
                 <span>•</span>
                 <span className="capitalize">{currentFarm.cropType} ({currentFarm.growthStage.replace('_', ' ')})</span>
               </p>
@@ -195,7 +198,7 @@ export default function HomePage() {
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 transition-colors"
             >
               <Sliders className="w-3.5 h-3.5" />
-              <span>Edit Farm Parameters</span>
+              <span>{t.editParamsBtn}</span>
             </button>
             <button
               onClick={() => loadAgronomicData(currentFarm)}
@@ -203,7 +206,7 @@ export default function HomePage() {
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Refresh Weather</span>
+              <span className="hidden sm:inline">{t.refreshWeatherBtn}</span>
             </button>
           </div>
         </div>
@@ -250,6 +253,11 @@ export default function HomePage() {
                 />
               </div>
             )}
+
+            {/* Subsidies & Certificate preview */}
+            {recommendation && (
+              <WaterSubsidiesCard recommendation={recommendation} farm={currentFarm} />
+            )}
           </div>
         )}
 
@@ -262,6 +270,13 @@ export default function HomePage() {
               onRefresh={() => loadAgronomicData(currentFarm)}
               isLoading={isLoading}
             />
+          </div>
+        )}
+
+        {activeTab === 'subsidies' && recommendation && (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            <WaterSubsidiesCard recommendation={recommendation} farm={currentFarm} />
+            <WaterAnalyticsChart recommendation={recommendation} farm={currentFarm} />
           </div>
         )}
 
@@ -295,7 +310,7 @@ export default function HomePage() {
             <Droplets className="w-4 h-4 text-sky-600" />
             <span className="font-semibold text-slate-800">AquaAI Systems</span>
             <span>•</span>
-            <span>Colosseum Crypto World&apos;s Fair 2026 Hackathon</span>
+            <span>Central Asia Climate Resilience</span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-600">
@@ -303,11 +318,11 @@ export default function HomePage() {
             <span>•</span>
             <span>Open-Meteo Weather API</span>
             <span>•</span>
-            <span>Solana Devnet Memo</span>
+            <span>Solana Devnet Audit</span>
           </div>
 
           <div className="text-[11px] text-slate-400">
-            &copy; 2026 AquaAI. Built for Kazakhstan &amp; Central Asia water resilience.
+            &copy; 2026 AquaAI. Қазақстан және Орталық Азия су ресурстарын сақтау.
           </div>
         </div>
       </footer>
@@ -323,5 +338,13 @@ export default function HomePage() {
         initialFarm={editingFarm}
       />
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <LanguageProvider>
+      <DashboardApp />
+    </LanguageProvider>
   );
 }

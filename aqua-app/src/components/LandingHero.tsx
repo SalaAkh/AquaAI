@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { FarmProfile } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface LandingHeroProps {
   onLaunchDashboard: () => void;
@@ -26,6 +27,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
   onExploreDemo,
   farm,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-sky-50/50 via-white to-slate-50 border-b border-slate-200">
       {/* Subtle background glow */}
@@ -45,15 +48,13 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
         {/* Hero Heading & Subtitle */}
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
-            Smarter Irrigation. <br />
+            {t.heroTitle} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-teal-600 to-emerald-600">
-              Every Drop Counts.
+              {t.heroHighlight}
             </span>
           </h1>
           <p className="mt-5 text-base sm:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            AI-powered precision irrigation assistant for farmers in Kazakhstan and Central Asia.
-            Combining FAO-56 scientific evapotranspiration models, Open-Meteo live numerical weather forecasts,
-            and Solana Devnet cryptographic verification.
+            {t.heroSubtitle}
           </p>
 
           {/* Action CTAs */}
@@ -62,14 +63,14 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
               onClick={onLaunchDashboard}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 active:scale-98 transition-all shadow-md shadow-slate-950/10"
             >
-              <span>Launch Dashboard</span>
+              <span>{t.launchDashboardBtn}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
             <button
               onClick={onExploreDemo}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-slate-700 border border-slate-200 text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-xs"
             >
-              <span>Explore Turkistan Demo</span>
+              <span>{t.exploreTurkistanBtn}</span>
             </button>
           </div>
         </div>
@@ -81,10 +82,10 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
               <div className="flex items-center gap-2.5">
                 <span className="flex h-3 w-3 rounded-full bg-emerald-500" />
                 <span className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
-                  Live Agronomic Preview: {farm.name}
+                  {farm.name}
                 </span>
                 <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium border border-emerald-200">
-                  {farm.fieldSizeHectares} Hectares • {farm.cropType.toUpperCase()}
+                  {farm.fieldSizeHectares} {t.hectares} • {farm.cropType.toUpperCase()}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -96,22 +97,22 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             {/* Quick Metrics Bar in Preview */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="text-[11px] font-medium text-slate-500 uppercase">Crop Water Need (ETc)</div>
+                <div className="text-[11px] font-medium text-slate-500 uppercase">{t.netEtc}</div>
                 <div className="mt-1 text-xl sm:text-2xl font-bold text-slate-900">18.4 <span className="text-xs font-normal text-slate-500">mm</span></div>
-                <div className="text-[11px] text-teal-600 mt-0.5">FAO-56 Penman-Monteith</div>
+                <div className="text-[11px] text-teal-600 mt-0.5">{t.badgeFao}</div>
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="text-[11px] font-medium text-slate-500 uppercase">Forecast Precipitation</div>
+                <div className="text-[11px] font-medium text-slate-500 uppercase">{t.effectiveRain}</div>
                 <div className="mt-1 text-xl sm:text-2xl font-bold text-slate-900">4.8 <span className="text-xs font-normal text-slate-500">mm</span></div>
-                <div className="text-[11px] text-sky-600 mt-0.5">Open-Meteo High Res</div>
+                <div className="text-[11px] text-sky-600 mt-0.5">{t.badgeWeather}</div>
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                <div className="text-[11px] font-medium text-slate-500 uppercase">Recommended Delivery</div>
+                <div className="text-[11px] font-medium text-slate-500 uppercase">{t.totalVolume}</div>
                 <div className="mt-1 text-xl sm:text-2xl font-bold text-sky-600">6,840 <span className="text-xs font-normal text-slate-500">m³</span></div>
-                <div className="text-[11px] text-emerald-600 mt-0.5">Drip system (90% eff.)</div>
+                <div className="text-[11px] text-emerald-600 mt-0.5">{t.methodDrip}</div>
               </div>
               <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
-                <div className="text-[11px] font-medium text-emerald-800 uppercase">Est. Water Saved</div>
+                <div className="text-[11px] font-medium text-emerald-800 uppercase">{t.savedWaterMetric}</div>
                 <div className="mt-1 text-xl sm:text-2xl font-bold text-emerald-700">5,472 <span className="text-xs font-normal text-emerald-600">m³</span></div>
                 <div className="text-[11px] text-emerald-600 mt-0.5">vs 50% flood baseline</div>
               </div>
@@ -122,14 +123,14 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
               <div className="flex items-center gap-2">
                 <Droplets className="w-4 h-4 text-sky-600 flex-shrink-0" />
                 <span>
-                  <strong>Irrigation Timing:</strong> Optimal application window tomorrow is <strong>05:30 – 08:30</strong> before peak vapor pressure deficit.
+                  <strong>{t.operationalAdviceTitle}:</strong> Оптимальное окно полива — утренние часы (05:30 – 08:30) до наступления суховея.
                 </span>
               </div>
               <button
                 onClick={onLaunchDashboard}
                 className="hidden sm:inline-flex text-xs font-semibold text-sky-700 hover:text-sky-900 underline underline-offset-2 ml-4 flex-shrink-0"
               >
-                Inspect 7-Day Schedule →
+                {t.launchDashboardBtn} →
               </button>
             </div>
           </div>
@@ -141,9 +142,9 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             <div className="w-9 h-9 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center mb-3">
               <Layers className="w-5 h-5" />
             </div>
-            <h2 className="text-sm font-bold text-slate-900">FAO-56 Scientific Engine</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t.badgeFao}</h2>
             <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-              Standard Penman-Monteith single crop coefficient calculations (ETc = ET0 × Kc) for wheat, cotton, rice, and vegetables.
+              Пенман-Монтейт и коэффициенты Kc культур для хлопка, пшеницы, риса и овощей.
             </p>
           </div>
 
@@ -151,9 +152,9 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             <div className="w-9 h-9 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center mb-3">
               <CloudSun className="w-5 h-5" />
             </div>
-            <h2 className="text-sm font-bold text-slate-900">Live Weather Prediction</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t.badgeWeather}</h2>
             <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-              Real-time 7-day meteorological forecasts from Open-Meteo including rainfall probability, radiation, and vapor deficit.
+              7-дневный численный метеопрогноз Open-Meteo: осадки, радиация, испарение ET0.
             </p>
           </div>
 
@@ -161,9 +162,9 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
               <Cpu className="w-5 h-5" />
             </div>
-            <h2 className="text-sm font-bold text-slate-900">Gemini Agronomic Advisor</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t.badgeGemini}</h2>
             <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-              AI translates complex hydrological numbers into straightforward, actionable guidance for farm operators in simple language.
+              ИИ переводит сложные гидрологические формулы в ясные практические указания поливальщикам.
             </p>
           </div>
 
@@ -171,9 +172,9 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h2 className="text-sm font-bold text-slate-900">Solana Devnet Proofs</h2>
+            <h2 className="text-sm font-bold text-slate-900">{t.badgeSolana}</h2>
             <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-              Cryptographically hashed recommendation records recorded using Solana Memo transactions for tamper-proof water auditing.
+              Криптографическая фиксация директив в блокчейне Solana Devnet через транзакции Memo.
             </p>
           </div>
         </div>

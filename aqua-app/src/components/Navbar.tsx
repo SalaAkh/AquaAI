@@ -1,17 +1,18 @@
 'use client';
 
 import React from 'react';
-import { Droplets, Sprout, ShieldCheck, Sparkles, Plus, Check } from 'lucide-react';
+import { Droplets, Sprout, ShieldCheck, Sparkles, Plus, Check, Globe, Award } from 'lucide-react';
 import { FarmProfile } from '@/lib/types';
 import { DEMO_FARM_ALMATY, DEMO_FARM_TURKISTAN } from '@/lib/constants';
+import { useTranslation, Language } from '@/lib/i18n';
 
 interface NavbarProps {
   currentFarm: FarmProfile;
   farms: FarmProfile[];
   onSelectFarm: (farm: FarmProfile) => void;
   onOpenNewFarmModal: () => void;
-  activeTab: 'dashboard' | 'analytics' | 'blockchain' | 'about';
-  setActiveTab: (tab: 'dashboard' | 'analytics' | 'blockchain' | 'about') => void;
+  activeTab: 'dashboard' | 'analytics' | 'blockchain' | 'subsidies' | 'about';
+  setActiveTab: (tab: 'dashboard' | 'analytics' | 'blockchain' | 'subsidies' | 'about') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -22,8 +23,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
 }) => {
+  const { t, language, setLanguage } = useTranslation();
+
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
@@ -37,11 +40,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center gap-1.5">
                 <span className="text-xl font-bold tracking-tight text-slate-900">Aqua</span>
                 <span className="text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-emerald-600">AI</span>
-                <span className="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">
+                <span className="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
                   Devnet
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 hidden sm:block">Central Asia Smart Irrigation</p>
+              <p className="text-[11px] text-slate-500 hidden sm:block">{t.brandTagline}</p>
             </div>
           </div>
 
@@ -49,71 +52,87 @@ export const Navbar: React.FC<NavbarProps> = ({
           <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/60">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 activeTab === 'dashboard'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60 font-semibold'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              Dashboard
+              {t.tabDashboard}
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 activeTab === 'analytics'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60 font-semibold'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              Water Analytics
+              {t.tabAnalytics}
+            </button>
+            <button
+              onClick={() => setActiveTab('subsidies')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1 ${
+                activeTab === 'subsidies'
+                  ? 'bg-white text-emerald-800 shadow-sm border border-emerald-200/60 font-semibold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+              }`}
+            >
+              <Award className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{t.tabSubsidies}</span>
             </button>
             <button
               onClick={() => setActiveTab('blockchain')}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 activeTab === 'blockchain'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60 font-semibold'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              Solana Verification
+              {t.tabBlockchain}
             </button>
             <button
               onClick={() => setActiveTab('about')}
-              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 activeTab === 'about'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/60 font-semibold'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              Aral Crisis
+              {t.tabAbout}
             </button>
           </nav>
 
-          {/* Farm Switcher & Quick Demo Selector */}
-          <div className="flex items-center gap-2.5">
-            {/* Quick Demo Toggle Pill */}
-            <div className="hidden lg:flex items-center bg-slate-100 border border-slate-200 rounded-lg p-0.5 text-xs">
+          {/* Right Tools: Language + Demo Farms + Add Field */}
+          <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <div className="flex items-center bg-slate-100 border border-slate-200/80 rounded-lg p-0.5 text-[11px] font-semibold text-slate-600 shadow-2xs">
               <button
-                onClick={() => onSelectFarm(DEMO_FARM_TURKISTAN)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1 ${
-                  currentFarm.id === DEMO_FARM_TURKISTAN.id
-                    ? 'bg-white text-emerald-700 shadow-xs font-semibold'
-                    : 'text-slate-600 hover:text-slate-900'
+                onClick={() => setLanguage('ru')}
+                className={`px-2 py-0.5 rounded transition-colors ${
+                  language === 'ru' ? 'bg-white text-slate-900 shadow-2xs' : 'hover:text-slate-900'
                 }`}
+                title="Русский"
               >
-                <span>Turkistan Cotton</span>
-                {currentFarm.id === DEMO_FARM_TURKISTAN.id && <Check className="w-3 h-3 text-emerald-600" />}
+                RU
               </button>
               <button
-                onClick={() => onSelectFarm(DEMO_FARM_ALMATY)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1 ${
-                  currentFarm.id === DEMO_FARM_ALMATY.id
-                    ? 'bg-white text-sky-700 shadow-xs font-semibold'
-                    : 'text-slate-600 hover:text-slate-900'
+                onClick={() => setLanguage('kk')}
+                className={`px-2 py-0.5 rounded transition-colors ${
+                  language === 'kk' ? 'bg-white text-emerald-800 shadow-2xs' : 'hover:text-slate-900'
                 }`}
+                title="Қазақша"
               >
-                <span>Almaty Wheat</span>
-                {currentFarm.id === DEMO_FARM_ALMATY.id && <Check className="w-3 h-3 text-sky-600" />}
+                KZ
+              </button>
+              <button
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-0.5 rounded transition-colors ${
+                  language === 'en' ? 'bg-white text-sky-800 shadow-2xs' : 'hover:text-slate-900'
+                }`}
+                title="English"
+              >
+                EN
               </button>
             </div>
 
@@ -128,7 +147,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   const selected = farms.find((f) => f.id === e.target.value);
                   if (selected) onSelectFarm(selected);
                 }}
-                className="appearance-none bg-white border border-slate-200 text-slate-800 text-xs font-medium rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer shadow-xs max-w-[170px] truncate"
+                className="appearance-none bg-white border border-slate-200 text-slate-800 text-xs font-medium rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer shadow-2xs max-w-[155px] truncate"
               >
                 {farms.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -147,10 +166,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* New Farm Button */}
             <button
               onClick={onOpenNewFarmModal}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 active:scale-95 transition-all shadow-xs"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 active:scale-95 transition-all shadow-2xs"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Add Field</span>
+              <span className="hidden sm:inline">{t.newFieldBtn}</span>
             </button>
           </div>
         </div>

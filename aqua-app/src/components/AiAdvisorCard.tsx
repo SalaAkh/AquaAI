@@ -12,6 +12,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { IrrigationRecommendation } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface AiAdvisorCardProps {
   recommendation: IrrigationRecommendation;
@@ -22,12 +23,13 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
   recommendation,
   onUpdateExplanation,
 }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [explanation, setExplanation] = useState(
     recommendation.aiExplanation || {
-      summary: `Your ${recommendation.farmName} requires approximately ${recommendation.totalGrossIrrigationMm} mm (${recommendation.totalVolumeM3.toLocaleString()} m³) of irrigation over the next ${recommendation.forecastDays} days. Forecast precipitation of ${recommendation.totalPrecipitationMm} mm is insufficient to cover estimated crop water demand.`,
-      farmerAdvice: `Distribute applications in early morning or evening windows (${recommendation.recommendedWindowSummary}) to suppress atmospheric evaporative losses.`,
-      conservationImpact: `Following this precision schedule saves approximately ${recommendation.potentialTotalSavingsM3.toLocaleString()} m³ (${recommendation.potentialSavingsPercentage}%) compared to regional 50% efficiency furrow flooding.`,
+      summary: `Хозяйству ${recommendation.farmName} требуется ориентировочно ${recommendation.totalGrossIrrigationMm} мм (${recommendation.totalVolumeM3.toLocaleString()} м³) полива на ближайшие ${recommendation.forecastDays} дней. Прогноз осадков (${recommendation.totalPrecipitationMm} мм) недостаточен для покрытия водного дефицита культуры.`,
+      farmerAdvice: `Распределите полив на ранние утренние часы (${recommendation.recommendedWindowSummary}), чтобы минимизировать ветровой снос и пиковое испарение.`,
+      conservationImpact: `Соблюдение данного графика экономит ориентировочно ${recommendation.potentialTotalSavingsM3.toLocaleString()} м³ (${recommendation.potentialSavingsPercentage}%) по сравнению с традиционным затоплением.`,
       modelConfidence: 'high' as const,
       source: 'algorithmic_fallback' as const,
     }
@@ -38,9 +40,9 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
       setExplanation(recommendation.aiExplanation);
     } else {
       setExplanation({
-        summary: `Your ${recommendation.farmName} requires approximately ${recommendation.totalGrossIrrigationMm} mm (${recommendation.totalVolumeM3.toLocaleString()} m³) of irrigation over the next ${recommendation.forecastDays} days. Forecast precipitation of ${recommendation.totalPrecipitationMm} mm is insufficient to cover estimated crop water demand.`,
-        farmerAdvice: `Distribute applications in early morning or evening windows (${recommendation.recommendedWindowSummary}) to suppress atmospheric evaporative losses.`,
-        conservationImpact: `Following this precision schedule saves approximately ${recommendation.potentialTotalSavingsM3.toLocaleString()} m³ (${recommendation.potentialSavingsPercentage}%) compared to regional 50% efficiency furrow flooding.`,
+        summary: `Хозяйству ${recommendation.farmName} требуется ориентировочно ${recommendation.totalGrossIrrigationMm} мм (${recommendation.totalVolumeM3.toLocaleString()} м³) полива на ближайшие ${recommendation.forecastDays} дней. Прогноз осадков (${recommendation.totalPrecipitationMm} мм) недостаточен для покрытия водного дефицита культуры.`,
+        farmerAdvice: `Распределите полив на ранние утренние часы (${recommendation.recommendedWindowSummary}), чтобы минимизировать ветровой снос и пиковое испарение.`,
+        conservationImpact: `Соблюдение данного графика экономит ориентировочно ${recommendation.potentialTotalSavingsM3.toLocaleString()} м³ (${recommendation.potentialSavingsPercentage}%) по сравнению с традиционным затоплением.`,
         modelConfidence: 'high' as const,
         source: 'algorithmic_fallback' as const,
       });
@@ -87,13 +89,13 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900">Gemini Agronomic Advisor</h3>
+              <h3 className="text-sm font-bold text-slate-900">{t.advisorTitle}</h3>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                 Grounded on FAO-56
               </span>
             </div>
             <p className="text-[11px] text-slate-500">
-              Plain-language synthesis for farmers &amp; water masters
+              {t.advisorSubtitle}
             </p>
           </div>
         </div>
@@ -105,7 +107,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs active:scale-95 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-sky-600 ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'Consulting Gemini...' : 'Regenerate Analysis'}</span>
+            <span>{loading ? 'Консультация с Gemini...' : t.refreshAiBtn}</span>
           </button>
         </div>
       </div>
@@ -116,7 +118,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
             <Droplets className="w-3.5 h-3.5 text-sky-600" />
-            Core Recommendation
+            Ключевой вывод гидромодели
           </div>
           <p className="text-sm font-medium text-slate-800 leading-relaxed">
             &ldquo;{explanation.summary}&rdquo;
@@ -128,7 +130,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
           <div className="p-4 rounded-xl border border-slate-200/80 bg-white">
             <div className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-              Operational Farmer Advice
+              {t.operationalAdviceTitle}
             </div>
             <p className="text-xs text-slate-700 leading-relaxed">
               {explanation.farmerAdvice}
@@ -138,7 +140,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
           <div className="p-4 rounded-xl border border-emerald-200/80 bg-emerald-50/30">
             <div className="text-xs font-semibold text-emerald-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              Conservation &amp; Efficiency Impact
+              {t.impactTitle}
             </div>
             <p className="text-xs text-emerald-950 leading-relaxed font-medium">
               {explanation.conservationImpact}
@@ -150,10 +152,10 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
         <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-            <span>AI responses are strictly constrained to FAO-56 inputs without synthetic observations.</span>
+            <span>Рекомендации строго ограничены физическими расчётами FAO-56.</span>
           </div>
           <span className="font-mono text-[10px] text-slate-400">
-            Confidence: {explanation.modelConfidence.toUpperCase()} • Mode: {explanation.source}
+            Достоверность: {explanation.modelConfidence.toUpperCase()} • Режим: {explanation.source}
           </span>
         </div>
       </div>

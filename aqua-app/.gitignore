@@ -19,3 +19,4 @@ yarn-debug.log*
 # OS & IDE
 .DS_Store
 Thumbs.db
+*.tsbuildinfo
