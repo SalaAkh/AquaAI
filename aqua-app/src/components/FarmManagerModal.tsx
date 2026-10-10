@@ -115,6 +115,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
               id="farm-name"
               name="farmName"
               type="text"
+              autoComplete="off"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -163,6 +164,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
                   id="farm-field-size"
                   name="fieldSizeHectares"
                   type="number"
+                  autoComplete="off"
                   min="0.5"
                   step="0.5"
                   max="10000"

@@ -347,6 +347,8 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
             id="solana-verification-input"
             name="solanaTxSignature"
             type="text"
+            autoComplete="off"
+            aria-label="Solana transaction signature"
             value={verificationInput}
             onChange={(e) => setVerificationInput(e.target.value)}
             placeholder="Paste Solana transaction signature..."

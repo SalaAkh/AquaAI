@@ -291,6 +291,8 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
 
           {/* Input Box */}
           <form
+            id="ai-advisor-chat-form"
+            name="aiAdvisorChatForm"
             onSubmit={(e) => {
               e.preventDefault();
               handleSendMessage();
@@ -298,7 +300,11 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
             className="flex items-center gap-2"
           >
             <input
+              id="ai-advisor-query-input"
+              name="aiAdvisorQuery"
               type="text"
+              autoComplete="off"
+              aria-label="Вопрос агроному-гидрологу"
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               placeholder="Спросите агронома (например: «Можно ли поливать завтра днем?»)..."
@@ -306,6 +312,8 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
               className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 placeholder:text-slate-400"
             />
             <button
+              id="ai-advisor-submit-btn"
+              name="aiAdvisorSubmit"
               type="submit"
               disabled={isSending || !inputQuery.trim()}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-semibold text-xs shadow-2xs transition-all active:scale-95"
