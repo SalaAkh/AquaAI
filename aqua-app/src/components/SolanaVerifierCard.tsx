@@ -342,7 +342,15 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2">
+        <form
+          id="solana-verification-form"
+          name="solanaVerificationForm"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleVerifyOnChain();
+          }}
+          className="flex flex-col sm:flex-row gap-2"
+        >
           <input
             id="solana-verification-input"
             name="solanaTxSignature"
@@ -355,13 +363,15 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
             className="flex-1 px-3.5 py-2 text-xs font-mono bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
           />
           <button
-            onClick={handleVerifyOnChain}
+            id="solana-verify-submit-btn"
+            name="solanaVerifySubmitBtn"
+            type="submit"
             disabled={isVerifying || !verificationInput.trim()}
             className="px-4 py-2 text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 rounded-xl transition-colors disabled:opacity-50"
           >
             {isVerifying ? 'Verifying RPC...' : 'Verify Signature'}
           </button>
-        </div>
+        </form>
 
         {verificationResult.tested && (
           <div
