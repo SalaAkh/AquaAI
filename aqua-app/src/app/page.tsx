@@ -5,6 +5,7 @@ import { Navbar } from '@/components/Navbar';
 import { LandingHero } from '@/components/LandingHero';
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { IrrigationCalculatorCard } from '@/components/IrrigationCalculatorCard';
+import { SatelliteNdviCard } from '@/components/SatelliteNdviCard';
 import { AiAdvisorCard } from '@/components/AiAdvisorCard';
 import { WaterAnalyticsChart } from '@/components/WaterAnalyticsChart';
 import { SolanaVerifierCard } from '@/components/SolanaVerifierCard';
@@ -16,6 +17,7 @@ import { DEMO_FARM_TURKISTAN } from '@/lib/constants';
 import { calculateIrrigationRecommendation } from '@/lib/fao56';
 import { fetchOpenMeteoForecast, generateCentralAsiaFallbackForecast } from '@/lib/weather';
 import { LanguageProvider, useTranslation } from '@/lib/i18n';
+import { WalletProvider } from '@/lib/wallet';
 import {
   getActiveFarmId,
   getSavedFarms,
@@ -39,7 +41,7 @@ function DashboardApp() {
   const { t } = useTranslation();
   const [farms, setFarms] = useState<FarmProfile[]>([DEMO_FARM_TURKISTAN]);
   const [currentFarm, setCurrentFarm] = useState<FarmProfile>(DEMO_FARM_TURKISTAN);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'blockchain' | 'subsidies' | 'about'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'satellite' | 'blockchain' | 'subsidies' | 'about'>('dashboard');
   const [showLandingHero, setShowLandingHero] = useState<boolean>(true);
   const [isFarmModalOpen, setIsFarmModalOpen] = useState<boolean>(false);
   const [editingFarm, setEditingFarm] = useState<FarmProfile | undefined>(undefined);
@@ -122,6 +124,45 @@ function DashboardApp() {
     }
   };
 
+  // Callback when user applies satellite-derived Kc adjustment
+  const handleApplySatelliteKc = (adjustedKc: number) => {
+    if (!recommendation) return;
+    const efficiency = recommendation.assumptions.irrigationEfficiency || 0.9;
+    const updatedSchedule = recommendation.schedule.map((day) => {
+      const etc = Number((day.et0Mm * adjustedKc).toFixed(1));
+      const net = Math.max(0, Number((etc - day.effectiveRainfallMm).toFixed(1)));
+      const gross = Number((net / efficiency).toFixed(1));
+      const vol = Math.round(gross * currentFarm.fieldSizeHectares * 10);
+      return {
+        ...day,
+        kc: adjustedKc,
+        etcMm: etc,
+        grossIrrigationMm: gross,
+        waterVolumeM3: vol,
+      };
+    });
+
+    const totalEtc = Number(updatedSchedule.reduce((a, s) => a + s.etcMm, 0).toFixed(1));
+    const totalGross = Number(updatedSchedule.reduce((a, s) => a + s.grossIrrigationMm, 0).toFixed(1));
+    const totalVol = Math.round(updatedSchedule.reduce((a, s) => a + s.waterVolumeM3, 0));
+    const baselineVol = recommendation.baselineTotalVolumeM3;
+    const savingsVol = Math.max(0, baselineVol - totalVol);
+    const savingsPct = Math.round((savingsVol / baselineVol) * 100);
+
+    const updatedRec: IrrigationRecommendation = {
+      ...recommendation,
+      totalEtcMm: totalEtc,
+      totalGrossIrrigationMm: totalGross,
+      totalVolumeM3: totalVol,
+      potentialTotalSavingsM3: savingsVol,
+      potentialSavingsPercentage: savingsPct,
+      schedule: updatedSchedule,
+    };
+
+    setRecommendation(updatedRec);
+    saveRecommendationToHistory(updatedRec);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       {/* Top Navbar */}
@@ -136,7 +177,6 @@ function DashboardApp() {
         activeTab={activeTab}
         setActiveTab={(tab) => {
           setActiveTab(tab);
-          // Scroll to main content if clicking tab
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />
@@ -231,6 +271,15 @@ function DashboardApp() {
               />
             )}
 
+            {/* Satellite Sentinel-2 NDVI Card */}
+            {recommendation && (
+              <SatelliteNdviCard
+                farm={currentFarm}
+                baselineKc={recommendation.schedule[0]?.kc ?? 1.15}
+                onApplySatelliteKc={handleApplySatelliteKc}
+              />
+            )}
+
             {/* Gemini AI Advisor Card */}
             {recommendation && (
               <AiAdvisorCard
@@ -258,6 +307,23 @@ function DashboardApp() {
             {recommendation && (
               <WaterSubsidiesCard recommendation={recommendation} farm={currentFarm} />
             )}
+          </div>
+        )}
+
+        {/* Satellite Dedicated Tab */}
+        {activeTab === 'satellite' && recommendation && (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            <SatelliteNdviCard
+              farm={currentFarm}
+              baselineKc={recommendation.schedule[0]?.kc ?? 1.15}
+              onApplySatelliteKc={handleApplySatelliteKc}
+            />
+            <IrrigationCalculatorCard
+              recommendation={recommendation}
+              farm={currentFarm}
+              onRefresh={() => loadAgronomicData(currentFarm)}
+              isLoading={isLoading}
+            />
           </div>
         )}
 
@@ -316,7 +382,7 @@ function DashboardApp() {
           <div className="flex items-center gap-4 text-slate-600">
             <span>FAO-56 Irrigation Engine</span>
             <span>•</span>
-            <span>Open-Meteo Weather API</span>
+            <span>Sentinel-2 NDVI Satellite</span>
             <span>•</span>
             <span>Solana Devnet Audit</span>
           </div>
@@ -344,7 +410,9 @@ function DashboardApp() {
 export default function HomePage() {
   return (
     <LanguageProvider>
-      <DashboardApp />
+      <WalletProvider>
+        <DashboardApp />
+      </WalletProvider>
     </LanguageProvider>
   );
 }

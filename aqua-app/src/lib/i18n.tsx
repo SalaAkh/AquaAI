@@ -10,11 +10,14 @@ export interface Translations {
   brandTagline: string;
   tabDashboard: string;
   tabAnalytics: string;
+  tabSatellite: string;
   tabBlockchain: string;
   tabAbout: string;
   tabSubsidies: string;
   newFieldBtn: string;
   solanaConnected: string;
+  connectWalletBtn: string;
+  disconnectBtn: string;
 
   // Farm Header
   demoFarmBadge: string;
@@ -131,11 +134,14 @@ const translations: Record<Language, Translations> = {
     brandTagline: 'Интеллектуальный полив для Центральной Азии',
     tabDashboard: 'Рабочая панель',
     tabAnalytics: 'Аналитика расхода',
+    tabSatellite: 'Спутник NDVI',
     tabBlockchain: 'Solana-аудит',
     tabSubsidies: 'Субсидии и сертификат',
     tabAbout: 'Кризис Арала',
     newFieldBtn: '+ Новое поле',
     solanaConnected: 'Solana Devnet ● Активен',
+    connectWalletBtn: 'Подключить кошелёк',
+    disconnectBtn: 'Отключить',
 
     demoFarmBadge: 'Демо-хозяйство',
     activeProdBadge: 'Действующее поле',
@@ -239,11 +245,14 @@ const translations: Record<Language, Translations> = {
     brandTagline: 'Орталық Азияға арналған ақылды суару жүйесі',
     tabDashboard: 'Басқару тақтасы',
     tabAnalytics: 'Су үнемдеу талдауы',
+    tabSatellite: 'Жерсерік NDVI',
     tabBlockchain: 'Solana аудиті',
     tabSubsidies: 'Субсидиялар мен сертификат',
     tabAbout: 'Арал дағдарысы',
     newFieldBtn: '+ Жаңа алқап',
     solanaConnected: 'Solana Devnet ● Белсенді',
+    connectWalletBtn: 'Әмиянды қосу',
+    disconnectBtn: 'Ажырату',
 
     demoFarmBadge: 'Демо-шаруашылық',
     activeProdBadge: 'Өндірістік алқап',
@@ -347,11 +356,14 @@ const translations: Record<Language, Translations> = {
     brandTagline: 'Smart Irrigation Assistant for Central Asia',
     tabDashboard: 'Dashboard',
     tabAnalytics: 'Water Analytics',
+    tabSatellite: 'Satellite NDVI',
     tabBlockchain: 'Blockchain Audit',
     tabSubsidies: 'Subsidies & Certificate',
     tabAbout: 'Aral Sea Crisis',
     newFieldBtn: '+ New Field',
     solanaConnected: 'Solana Devnet ● Connected',
+    connectWalletBtn: 'Connect Wallet',
+    disconnectBtn: 'Disconnect',
 
     demoFarmBadge: 'Demo Farm',
     activeProdBadge: 'Active Production',

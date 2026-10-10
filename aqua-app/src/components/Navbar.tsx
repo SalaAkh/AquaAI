@@ -1,18 +1,31 @@
 'use client';
 
 import React from 'react';
-import { Droplets, Sprout, ShieldCheck, Sparkles, Plus, Check, Globe, Award } from 'lucide-react';
+import {
+  Droplets,
+  Sprout,
+  ShieldCheck,
+  Sparkles,
+  Plus,
+  Check,
+  Globe,
+  Award,
+  Satellite,
+  Wallet,
+  LogOut,
+} from 'lucide-react';
 import { FarmProfile } from '@/lib/types';
 import { DEMO_FARM_ALMATY, DEMO_FARM_TURKISTAN } from '@/lib/constants';
 import { useTranslation, Language } from '@/lib/i18n';
+import { useSolanaWallet } from '@/lib/wallet';
 
 interface NavbarProps {
   currentFarm: FarmProfile;
   farms: FarmProfile[];
   onSelectFarm: (farm: FarmProfile) => void;
   onOpenNewFarmModal: () => void;
-  activeTab: 'dashboard' | 'analytics' | 'blockchain' | 'subsidies' | 'about';
-  setActiveTab: (tab: 'dashboard' | 'analytics' | 'blockchain' | 'subsidies' | 'about') => void;
+  activeTab: 'dashboard' | 'analytics' | 'satellite' | 'blockchain' | 'subsidies' | 'about';
+  setActiveTab: (tab: 'dashboard' | 'analytics' | 'satellite' | 'blockchain' | 'subsidies' | 'about') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -24,6 +37,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
 }) => {
   const { t, language, setLanguage } = useTranslation();
+  const {
+    publicKey,
+    shortAddress,
+    isConnected,
+    isConnecting,
+    balanceSol,
+    connectWallet,
+    disconnectWallet,
+  } = useSolanaWallet();
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 transition-all">
@@ -59,6 +81,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               {t.tabDashboard}
+            </button>
+            <button
+              onClick={() => setActiveTab('satellite')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex items-center gap-1 ${
+                activeTab === 'satellite'
+                  ? 'bg-white text-teal-800 shadow-sm border border-teal-200/60 font-semibold'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+              }`}
+            >
+              <Satellite className="w-3.5 h-3.5 text-teal-600" />
+              <span>{t.tabSatellite}</span>
             </button>
             <button
               onClick={() => setActiveTab('analytics')}
@@ -103,8 +136,37 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </nav>
 
-          {/* Right Tools: Language + Demo Farms + Add Field */}
+          {/* Right Tools: Solana Wallet + Language + Farm Picker + Add Field */}
           <div className="flex items-center gap-2">
+            {/* Solana Web3 Wallet Button */}
+            {isConnected ? (
+              <div className="flex items-center gap-1 bg-purple-50 border border-purple-200 rounded-lg px-2 py-1 text-xs">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-bold text-purple-950 font-mono">{shortAddress}</span>
+                {balanceSol !== null && (
+                  <span className="text-[10px] text-purple-700 font-medium hidden sm:inline">
+                    {balanceSol} SOL
+                  </span>
+                )}
+                <button
+                  onClick={disconnectWallet}
+                  className="ml-1 p-0.5 text-purple-400 hover:text-purple-700 transition-colors"
+                  title={t.disconnectBtn}
+                >
+                  <LogOut className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={connectWallet}
+                disabled={isConnecting}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white active:scale-95 transition-all shadow-2xs"
+              >
+                <Wallet className="w-3.5 h-3.5 text-purple-200" />
+                <span className="hidden sm:inline">{isConnecting ? '...' : t.connectWalletBtn}</span>
+              </button>
+            )}
+
             {/* Language Switcher */}
             <div className="flex items-center bg-slate-100 border border-slate-200/80 rounded-lg p-0.5 text-[11px] font-semibold text-slate-600 shadow-2xs">
               <button
@@ -147,7 +209,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   const selected = farms.find((f) => f.id === e.target.value);
                   if (selected) onSelectFarm(selected);
                 }}
-                className="appearance-none bg-white border border-slate-200 text-slate-800 text-xs font-medium rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer shadow-2xs max-w-[155px] truncate"
+                className="appearance-none bg-white border border-slate-200 text-slate-800 text-xs font-medium rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer shadow-2xs max-w-[140px] truncate"
               >
                 {farms.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -166,7 +228,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* New Farm Button */}
             <button
               onClick={onOpenNewFarmModal}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 active:scale-95 transition-all shadow-2xs"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 active:scale-95 transition-all shadow-2xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{t.newFieldBtn}</span>

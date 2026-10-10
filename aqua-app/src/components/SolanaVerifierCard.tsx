@@ -23,6 +23,7 @@ import {
   verifyOnChainSignature,
   SOLANA_DEVNET_RPC,
 } from '@/lib/solana';
+import { useSolanaWallet } from '@/lib/wallet';
 
 interface SolanaVerifierCardProps {
   recommendation: IrrigationRecommendation;
@@ -87,45 +88,29 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
     };
   }, [recommendation]);
 
-  const handleConnectWallet = async () => {
-    if (typeof window === 'undefined') return;
-    setIsConnectingWallet(true);
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const solana = (window as any).solana;
-      if (solana) {
-        const resp = await solana.connect();
-        const pubkey = resp.publicKey.toString();
-        setWalletAddress(pubkey);
-      } else {
-        alert('No Solana wallet detected. Please install Phantom (phantom.app) or use Devnet sponsored testing mode.');
-      }
-    } catch (err) {
-      console.error('Failed to connect wallet:', err);
-    } finally {
-      setIsConnectingWallet(false);
-    }
-  };
+  const wallet = useSolanaWallet();
 
   const handleCommitToSolana = async () => {
     setIsSubmitting(true);
     try {
-      let walletArg: {
-        publicKey: PublicKey;
-        signTransaction: (tx: any) => Promise<any>;
-      } | undefined = undefined;
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const solana = typeof window !== 'undefined' ? (window as any).solana : undefined;
-      if (solana && solana.isConnected && solana.publicKey) {
-        walletArg = {
-          publicKey: solana.publicKey,
-          signTransaction: solana.signTransaction.bind(solana),
+      let result: OnChainProof;
+      if (wallet.isConnected) {
+        const memoPayload = `AQUA-AI:V1:${recommendation.id}:${hash.slice(0, 32)}`;
+        const res = await wallet.sendMemoWithWallet(memoPayload);
+        result = {
+          dataHash: hash,
+          signature: res.signature,
+          slot: res.slot,
+          timestamp: new Date().toISOString(),
+          cluster: 'devnet',
+          explorerUrl: `https://explorer.solana.com/tx/${res.signature}?cluster=devnet`,
+          status: 'verified',
+          memoPayload,
         };
+      } else {
+        result = await commitProofToSolana(recommendation);
       }
 
-      // Connect to Solana Devnet and submit real Memo transaction
-      const result = await commitProofToSolana(recommendation, walletArg);
       setProof(result);
       if (onProofCreated) {
         onProofCreated(result);
@@ -203,20 +188,22 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
 
         {/* Wallet Status / Connect Button */}
         <div className="flex items-center gap-2">
-          {walletAddress ? (
+          {wallet.isConnected ? (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-xl text-xs font-semibold text-purple-800">
               <Wallet className="w-3.5 h-3.5 text-purple-600" />
-              <span>{walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}</span>
-              <span className="text-[10px] px-1.5 py-0.2 bg-purple-200/70 text-purple-900 rounded font-mono">Devnet</span>
+              <span>{wallet.shortAddress}</span>
+              <span className="text-[10px] px-1.5 py-0.2 bg-purple-200/70 text-purple-900 rounded font-mono">
+                {wallet.walletName || 'Devnet'}
+              </span>
             </div>
           ) : (
             <button
-              onClick={handleConnectWallet}
-              disabled={isConnectingWallet}
+              onClick={wallet.connectWallet}
+              disabled={wallet.isConnecting}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50/80 hover:bg-purple-100 text-xs font-semibold text-purple-800 transition-colors shadow-2xs"
             >
               <Wallet className="w-3.5 h-3.5" />
-              <span>{isConnectingWallet ? 'Connecting...' : hasBrowserWallet ? 'Connect Phantom' : 'Connect Wallet'}</span>
+              <span>{wallet.isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
             </button>
           )}
         </div>

@@ -120,3 +120,30 @@ export interface OnChainProof {
   memoPayload: string;
   error?: string;
 }
+
+export interface SatellitePixel {
+  row: number;
+  col: number;
+  ndvi: number;
+  ndwi: number;
+  waterStress: 'optimal' | 'mild_deficit' | 'severe_stress';
+}
+
+export interface SatelliteImageryData {
+  farmId: string;
+  acquisitionDate: string;
+  satelliteMission: 'Sentinel-2A/B MSI L2A' | 'Landsat-9 OLI-2';
+  resolutionMeters: number;
+  cloudCoverPercent: number;
+  meanNdvi: number;
+  meanNdwi: number;
+  minNdvi: number;
+  maxNdvi: number;
+  vegetationVigor: 'dense_canopy' | 'moderate_growth' | 'sparse_canopy' | 'stressed_canopy';
+  waterStressStatus: 'optimal_hydration' | 'moderate_deficit' | 'severe_stress';
+  faoBaselineKc: number;
+  satelliteAdjustedKc: number;
+  kcAdjustmentPercent: number;
+  spatialUniformityPercent: number;
+  grid: SatellitePixel[][];
+}
