@@ -6,6 +6,7 @@ import { LandingHero } from '@/components/LandingHero';
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { IrrigationCalculatorCard } from '@/components/IrrigationCalculatorCard';
 import { SatelliteNdviCard } from '@/components/SatelliteNdviCard';
+import { SoilMoistureSensorCard } from '@/components/SoilMoistureSensorCard';
 import { AiAdvisorCard } from '@/components/AiAdvisorCard';
 import { WaterAnalyticsChart } from '@/components/WaterAnalyticsChart';
 import { SolanaVerifierCard } from '@/components/SolanaVerifierCard';
@@ -280,10 +281,14 @@ function DashboardApp() {
               />
             )}
 
-            {/* Gemini AI Advisor Card */}
+            {/* IoT Soil Moisture Telemetry Probe (Ground truth validation) */}
+            <SoilMoistureSensorCard farm={currentFarm} />
+
+            {/* Gemini AI Advisor Card with Interactive Chat */}
             {recommendation && (
               <AiAdvisorCard
                 recommendation={recommendation}
+                farm={currentFarm}
                 onUpdateExplanation={(newExpl) => {
                   if (recommendation) {
                     setRecommendation({ ...recommendation, aiExplanation: newExpl });
@@ -318,6 +323,7 @@ function DashboardApp() {
               baselineKc={recommendation.schedule[0]?.kc ?? 1.15}
               onApplySatelliteKc={handleApplySatelliteKc}
             />
+            <SoilMoistureSensorCard farm={currentFarm} />
             <IrrigationCalculatorCard
               recommendation={recommendation}
               farm={currentFarm}

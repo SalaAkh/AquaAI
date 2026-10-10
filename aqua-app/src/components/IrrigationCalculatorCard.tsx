@@ -12,6 +12,8 @@ import {
   ArrowDownRight,
   TrendingDown,
   Layers,
+  FileSpreadsheet,
+  Download,
 } from 'lucide-react';
 import { FarmProfile, IrrigationRecommendation } from '@/lib/types';
 import { GROWTH_STAGE_LABELS, IRRIGATION_EFFICIENCIES } from '@/lib/constants';
@@ -57,6 +59,43 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
       default:
         return null;
     }
+  };
+
+  const handleExportCsv = () => {
+    const headers = [
+      'Дата',
+      'Культура',
+      'Фаза роста',
+      'ET0 испарение (мм)',
+      'ETc потребность (мм)',
+      'Осадки (мм)',
+      'Брутто норма (мм)',
+      'Объем воды (м3)',
+      'Рекомендация',
+      'Окно полива',
+      'Обоснование',
+    ];
+    const rows = recommendation.schedule.map((day) => [
+      day.dayLabel,
+      farm.cropType,
+      farm.growthStage,
+      day.et0Mm,
+      day.etcMm,
+      day.precipitationMm,
+      day.grossIrrigationMm,
+      day.waterVolumeM3,
+      day.action === 'irrigate' ? 'Необходим полив' : day.action === 'delay' ? 'Отложить' : 'Пропустить',
+      day.recommendedWindow,
+      `"${day.actionReason.replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `AquaAI_Поливной_наряд_${farm.name.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}_${recommendation.periodStart}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -165,9 +204,19 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
 
       {/* Daily Schedule Table */}
       <div className="p-6">
-        <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">
-          {t.scheduleTitle}
-        </h4>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            {t.scheduleTitle}
+          </h4>
+          <button
+            onClick={handleExportCsv}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors shadow-2xs"
+            title="Скачать суточный поливной наряд в Excel/CSV"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Экспорт наряда (.CSV)</span>
+          </button>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>

@@ -9,6 +9,9 @@ import {
   ArrowUpRight,
   Info,
   Calendar,
+  Zap,
+  Fuel,
+  Leaf,
 } from 'lucide-react';
 import { FarmProfile, IrrigationRecommendation } from '@/lib/types';
 
@@ -222,6 +225,51 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Energy & Fuel ROI Grid */}
+      <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-50/50 via-slate-50 to-emerald-50/40 border border-slate-250 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            Энергетическая и экологическая эффективность (ROI насосов)
+          </span>
+          <span className="text-[11px] text-slate-500">За счёт снижения перекачки влаги</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
+            <div className="text-[11px] text-slate-500 font-medium">Электроэнергия:</div>
+            <div className="mt-1 text-lg font-extrabold text-amber-700">
+              {Math.round(recommendation.potentialTotalSavingsM3 * 0.35).toLocaleString()} <span className="text-xs font-normal text-slate-500">кВт⋅ч</span>
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">0.35 кВт⋅ч на 1 м³</div>
+          </div>
+
+          <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
+            <div className="text-[11px] text-slate-500 font-medium">Дизельное топливо:</div>
+            <div className="mt-1 text-lg font-extrabold text-sky-800">
+              {Math.round(recommendation.potentialTotalSavingsM3 * 0.08).toLocaleString()} <span className="text-xs font-normal text-slate-500">литров</span>
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Для ДВС-мотопомп</div>
+          </div>
+
+          <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
+            <div className="text-[11px] text-slate-500 font-medium">Экономия на ГСМ:</div>
+            <div className="mt-1 text-lg font-extrabold text-emerald-700">
+              ₸ {Math.round(recommendation.potentialTotalSavingsM3 * 0.08 * 350).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">по 350 ₸ / литр ДТ</div>
+          </div>
+
+          <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
+            <div className="text-[11px] text-slate-500 font-medium">Сокращение выбросов:</div>
+            <div className="mt-1 text-lg font-extrabold text-teal-800">
+              {(Math.round(recommendation.potentialTotalSavingsM3 * 0.35 * 0.62) / 1000).toFixed(2)} <span className="text-xs font-normal text-slate-500">т CO₂</span>
+            </div>
+            <div className="text-[10px] text-emerald-600 font-medium mt-0.5">ESG / Углеродный след</div>
+          </div>
         </div>
       </div>
 
