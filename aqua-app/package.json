@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build:css": "node compile-css.mjs",
-    "dev": "node compile-css.mjs && next dev --webpack",
-    "build": "node compile-css.mjs && next build --webpack",
+    "prebuild": "node compile-css.mjs",
+    "build": "next build --webpack",
     "start": "next start",
     "test": "node tests/fao56.test.mjs",
     "test:e2e": "node tests/test_e2e_journey.mjs",
