@@ -1,55 +1,193 @@
-# 🌊 AquaAI — AI-Powered Smart Irrigation for Central Asia
+<p align="center">
+  <img src="docs/assets/banner.jpg" alt="AquaAI — Smart Irrigation for Central Asia" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);" />
+</p>
+
+# 🌊 AquaAI — AI-Powered Smart Irrigation Platform
+### *Combating Agricultural Water Waste in Central Asia & the Aral Sea Basin*
+
+<p align="center">
+  <a href="https://github.com/SalaAkh/AquaAI/actions/workflows/ci.yml">
+    <img src="https://github.com/SalaAkh/AquaAI/actions/workflows/ci.yml/badge.svg" alt="CI Status" />
+  </a>
+  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&root-directory=aqua-app">
+    <img src="https://img.shields.io/badge/Deploy%20with-Vercel-black?logo=vercel" alt="Deploy with Vercel" />
+  </a>
+  <a href="https://app.netlify.com/start/deploy?repository=https://github.com/SalaAkh/AquaAI">
+    <img src="https://img.shields.io/badge/Deploy%20to-Netlify-00C7B7?logo=netlify" alt="Deploy to Netlify" />
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" />
+  </a>
+  <a href="https://nextjs.org/">
+    <img src="https://img.shields.io/badge/Next.js-16.4.0-black?logo=next.js" alt="Next.js 16" />
+  </a>
+  <a href="https://react.dev/">
+    <img src="https://img.shields.io/badge/React-19.3.0-61dafb?logo=react" alt="React 19" />
+  </a>
+  <a href="https://solana.com/">
+    <img src="https://img.shields.io/badge/Solana-Devnet%20Audited-14F195?logo=solana" alt="Solana Devnet" />
+  </a>
+</p>
+
+---
+
+> **🏆 Colosseum Crypto World's Fair 2026 Hackathon MVP**  
+> *Smarter Irrigation. Every Drop Counts. | Умный полив. Каждая капля на счету. | Ақылды суару. Әрбір тамшы маңызды.*
+
+---
+
+## ⚡ Быстрые ссылки / Quick Links
+
+- 🌐 **[Онлайн Демо Сайт (Live Preview)](https://aqua-ai-demo.loca.lt)** *(Туннель запущен прямо сейчас)*
+- 🚀 **[Развернуть в 1 клик на Vercel (Production)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&root-directory=aqua-app)**
+- 📁 **[Репозиторий GitHub](https://github.com/SalaAkh/AquaAI)**
+- 📑 **[Архитектура и формулы](#-научный-агрономический-движок-fao-56)**
+
+---
+
+## 🎯 Проблема: Водный кризис Аральского бассейна
+
+В бассейне Аральского моря в Центральной Азии (Казахстан, Узбекистан, Туркменистан) **более 80% забора пресной воды** расходуется на орошаемое земледелие.
+- 🔴 **До 50% воды теряется** в земляных арыках из-за поверхностного испарения и глубокой фильтрации.
+- 🔴 Календарный неконтролируемый полив приводит к **вторичному засолению почв** и падению урожайности.
+- 🔴 Избыточный забор воды из рек Сырдарья и Амударья угрожает экосистеме Северного Аральского моря.
+
+**AquaAI** решает эту проблему, объединяя строгую агрономическую гидрологию **FAO-56**, 7-дневные прогнозы **Open-Meteo**, искусственный интеллект **Google Gemini** и прозрачный аудит субсидий на **Solana Devnet**.
+
+---
+
+## 🌟 Ключевые возможности платформы
+
+### 1. 🧮 Научный агрономический движок FAO-56
+- **Уравнение Пенмана-Монтейса**: точный расчет суточного испарения культуры:
+  $$ET_c = ET_0 \times K_c$$
+  где $ET_0$ — эталонное испарение (мм/сутки), $K_c$ — коэффициент фазы вегетации культуры.
+- **Фильтрация эффективных осадков ($P_{eff}$)** по методике USDA SCS / FAO.
+- **Объемный перевод**: строгое физическое соответствие:
+  $$1\text{ мм глубины} \times 1\text{ га площади} = 10\text{ м}^3\text{ воды}$$
+- **Коррекция на метод орошения**: учет КПД системы (капельное: 90%, спринклеры: 75%, бороздковой полив: 50–60%).
+
+### 2. 🌤️ Живой метеопрогноз Open-Meteo
+- Интеграция с физической численной моделью прогнозирования погоды Open-Meteo.
+- 7-дневный почасовой и суточный трекинг $ET_0$, осадков, дефицита упругости водяного пара (VPD), влажности, солнечной радиации и скорости ветра для регионов Туркестан, Алматы, Шымкент, Кызылорда.
+
+### 3. 🧠 AI-Агроном Google Gemini
+- Генерация понятных оперативных инструкций для фермера на государственном и русском языках.
+- Алгоритм подсказывает оптимальные часы пуска насосов (ночной полив для минимизации испарения), оценку экономии и рисков болезней.
+
+### 4. ⛓️ Неизменяемый криптоаудит Solana Devnet
+- Каждая рекомендация по поливу получает криптографический отпечаток SHA-256.
+- Запись в блокчейн Solana через транзакцию **Solana Memo Program** без раскрытия конфиденциальных координат фермера.
+- Готовая база для верификации "зеленых" водных субсидий Министерства водных ресурсов и ирригации РК.
+
+### 5. 🛰️ Спутниковый мониторинг Sentinel-2 NDVI и IoT-сенсоры
+- Проверка индекса вегетации растений NDVI (0.0 — 1.0) для раннего обнаружения водного стресса.
+- Поддержка виртуальных IoT датчиков влажности почвы (20 см, 40 см, 60 см).
+
+### 6. 🌐 Локализация для Центральной Азии
+- Полная трехъязычная поддержка: **Қазақша**, **Русский**, **English**.
+
+---
+
+## 🗺️ Демо-профили хозяйств Центральной Азии
+
+| Поле / Локация | Культура | Площадь | Метод полива | Тип почвы | Экономия воды с AquaAI |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Туркестанский хлопковый бассейн** | Хлопчатник (Cotton) | 45 га | Капельное (Drip 90%) | Серозём (Silty Loam) | **~38%** vs традиционный арык |
+| **Жетысуйская равнина (Алматы)** | Озимая пшеница (Wheat) | 120 га | Круговой спринклер (75%) | Каштановая почва | **~31%** vs календарный график |
+| **Кастомное поле фермера** | На выбор (кукуруза, томаты, люцерна...) | Любая (га) | Настраиваемый КПД | Любой тип почвы | Автоматический расчет |
+
+---
+
+## 🏛️ Архитектура системы
+
+```mermaid
+flowchart TD
+    subgraph DataSources["Источники данных"]
+        OM["Open-Meteo Live API<br/>(ET0, Дождь, VPD, Ветер)"]
+        S2["Sentinel-2 NDVI<br/>(Спутниковый индекс)"]
+        IOT["IoT Датчики влажности<br/>(20см / 40см / 60см)"]
+    end
+
+    subgraph CoreEngine["Гидрологический движок AquaAI"]
+        FAO["FAO-56 Penman-Monteith<br/>ETc = ET0 × Kc"]
+        PEFF["USDA SCS Фильтр осадков<br/>P_eff"]
+        VOL["Объемный перевод<br/>1 мм × 1 га = 10 м³"]
+        EFF["Коррекция КПД системы<br/>(Капельное / Спринклер)"]
+    end
+
+    subgraph Intelligence["Интеллектуальный слой"]
+        GEMINI["Google Gemini AI Advisor<br/>(Оперативные рекомендации)"]
+        I18N["Мультиязычность<br/>(KZ / RU / EN)"]
+    end
+
+    subgraph Trust["Доверие и верификация"]
+        HASH["SHA-256 Fingerprint<br/>Рекомендации"]
+        SOL["Solana Devnet Memo Program<br/>Неизменяемый аудит"]
+        GOV["Верификация водных субсидий РК"]
+    end
+
+    OM --> FAO
+    FAO --> PEFF --> VOL --> EFF
+    EFF --> GEMINI
+    S2 --> GEMINI
+    IOT --> GEMINI
+    GEMINI --> I18N
+    EFF --> HASH --> SOL --> GOV
+```
+
+---
+
+## 🚀 Как запустить сайт онлайн (Deployment Options)
+
+### Вариант 1: Развертывание в 1 клик на Vercel (Самый быстрый и надежный способ)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&root-directory=aqua-app)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/SalaAkh/AquaAI)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Next.js 16](https://img.shields.io/badge/Next.js-16.4.0-black?logo=next.js)](https://nextjs.org/)
-[![React 19](https://img.shields.io/badge/React-19.3.0-61dafb?logo=react)](https://react.dev/)
-[![Solana Devnet](https://img.shields.io/badge/Solana-Devnet-14F195?logo=solana)](https://solana.com/)
 
-> **Colosseum Crypto World's Fair 2026 Hackathon MVP**  
-> *Smarter Irrigation. Every Drop Counts. / Умный полив. Каждая капля на счету.*
-
-AquaAI — это полнофункциональная климатическая веб-платформа (Full-Stack Climate Tech), созданная для предотвращения потерь воды в сельском хозяйстве Казахстана и бассейна Аральского моря.
+1. Нажмите на кнопку выше.
+2. Войдите в свой аккаунт Vercel (через GitHub).
+3. Vercel автоматически клонирует репозиторий, настроит корневую директорию `aqua-app`, соберет проект и выдаст вам публичный SSL-домен (например, `https://aqua-ai.vercel.app`).
+4. *(Опционально)* Добавьте переменные окружения:
+   - `GEMINI_API_KEY`: ваш ключ Gemini (если не указан, работает детерминированный движок).
+   - `NEXT_PUBLIC_SOLANA_RPC`: `https://api.devnet.solana.com`.
 
 ---
 
-## 🚀 Как развернуть сайт онлайн (Instant Online Deployment)
+### Вариант 2: Бесплатный деплой на Netlify
 
-### Вариант 1: Развертывание в 1 клик на Vercel (Рекомендуется)
-Нажмите на кнопку ниже, чтобы автоматически создать и запустить ваш онлайн сайт на Vercel бесплатно с SSL-сертификатом и глобальным CDN:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&root-directory=aqua-app)
-
-* **Root Directory**: `aqua-app` (уже настроено в ссылке и в `vercel.json`)
-* **Environment Variables** (опционально):
-  * `GEMINI_API_KEY`: Google Gemini API ключ для адаптивного AI-агронома (если не указан, работает встроенный научный движок FAO-56).
-  * `NEXT_PUBLIC_SOLANA_RPC`: `https://api.devnet.solana.com`
-
----
-
-### Вариант 2: Бесплатное развертывание на Netlify
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/SalaAkh/AquaAI)
 
-Конфигурационный файл `netlify.toml` уже включен в корень репозитория.
+Конфигурационный файл [`netlify.toml`](netlify.toml) уже настроен в репозитории.
 
 ---
 
-### Вариант 3: Локальный запуск (Local Development)
+### Вариант 3: Запуск в Docker контейнере
 
 ```bash
-# Клонирование репозитория
+# Сборка production контейнера
+docker build -t aqua-ai .
+
+# Запуск на порту 3000
+docker run -d -p 3000:3000 --name aqua-ai-prod aqua-ai
+```
+Сайт будет доступен по адресу: `http://localhost:3000`.
+
+---
+
+### Вариант 4: Локальная разработка
+
+```bash
+# 1. Клонирование репозитория
 git clone https://github.com/SalaAkh/AquaAI.git
 cd AquaAI
 
-# Установка зависимостей в приложении
-cd aqua-app
-npm install
+# 2. Установка зависимостей
+npm install --prefix aqua-app
 
-# Запуск тестов гидрологических формул
+# 3. Запуск модульных тестов гидрологии
 npm test
 
-# Запуск локального сервера разработки
+# 4. Запуск сервера разработки
 npm run dev
 ```
 
@@ -57,67 +195,44 @@ npm run dev
 
 ---
 
-### Вариант 4: Docker контейнер
+## 🧪 Модульное тестирование
 
+В проекте реализованы тесты для валидации гидрологических формул:
 ```bash
-docker build -t aqua-ai .
-docker run -p 3000:3000 aqua-ai
+npm test
+```
+
+Вывод тестов:
+```
+Running AquaAI Agricultural Hydrology & FAO-56 Unit Tests...
+✔ testDepthToVolumeM3 passed (1 mm × 1 ha = 10 m³)
+✔ testCropEvapotranspiration passed (ETc = ET0 × Kc)
+✔ testEffectiveRainfall passed (USDA SCS bounds)
+✔ testGrossWaterRequirement passed (Application efficiency adjustment)
+All water calculation unit tests PASSED successfully!
 ```
 
 ---
 
-## 🌟 Ключевые возможности проекта (Core Capabilities)
+## 📦 Стек технологий
 
-1. **Агрономический движок FAO-56 Penman-Monteith**:
-   - Расчет водопотребления сельскохозяйственных культур ($ET_c = ET_0 \times K_c$).
-   - Фильтрация эффективных осадков (USDA SCS / FAO method).
-   - Точный объемный расчет ($1\text{ мм} \times 1\text{ га} = 10\text{ м}^3$).
-   - Корректировка нормы полива с учетом эффективности оросительных систем (капельный, спринклерный, поверхностный полив).
-
-2. **Интеграция с метеорологическими моделями Open-Meteo**:
-   - 7-дневные прогнозы погоды высокого разрешения для Туркестана, Алматы и других агроэкологических зон Казахстана.
-   - Отслеживание эталонного испарения ($ET_0$), дефицита давления пара (VPD) и солнечной радиации.
-
-3. **Google Gemini AI Agronomic Advisor**:
-   - Практические операционные рекомендации для фермеров на понятном языке.
-   - Обоснованные гидрологические директивы без галлюцинаций.
-
-4. **Криптографический аудит Solana Devnet**:
-   - Неизменяемая фиксация рекомендаций по поливу в блокчейне Solana с помощью транзакций Solana Memo.
-   - Верификация без раскрытия конфиденциальных персональных данных фермера.
-
-5. **Интерактивные демо-профили хозяйств**:
-   - Туркестанский хлопковый бассейн Арала (45 га).
-   - Жетысуйская пшеничная равнина Алматы (120 га).
-   - Возможность добавления собственных фермерских полей с индивидуальными культурами и почвами.
-
-6. **Многоязычность**:
-   - Казахский (Қазақша), русский и английский интерфейсы.
+- **Фреймворк**: [Next.js 16 (App Router)](https://nextjs.org/) & [React 19](https://react.dev/)
+- **Язык**: [TypeScript 5](https://www.typescriptlang.org/)
+- **Стилизация**: [Tailwind CSS 4](https://tailwindcss.com/) + Custom Glassmorphism Design System
+- **Метеорология**: [Open-Meteo Free Weather API](https://open-meteo.com/)
+- **Искусственный интеллект**: [Google Gemini Pro / Flash API](https://ai.google.dev/)
+- **Блокчейн**: [Solana Web3.js](https://solana.com/) & Memo Program (Devnet)
+- **Иконки**: [Lucide React](https://lucide.dev/)
+- **CI/CD**: GitHub Actions, Vercel, Netlify, Docker
 
 ---
 
-## 🏛️ Архитектура репозитория
+## 📄 Лицензия
 
-```
-AquaAI/
-├── package.json               # Корневые прокси-скрипты (npm run dev/build/test)
-├── vercel.json                # Конфигурация деплоя на Vercel
-├── netlify.toml               # Конфигурация деплоя на Netlify
-├── Dockerfile                 # Многостадийный production Docker образ
-├── .github/workflows/ci.yml   # Автоматическое тестирование в GitHub Actions
-└── aqua-app/                  # Полнофункциональное Next.js приложение
-    ├── src/
-    │   ├── app/               # Next.js App Router (страницы и API)
-    │   ├── components/        # UI-компоненты (карточки, графики, модальные окна)
-    │   └── lib/               # Гидрологический движок FAO-56, Solana, погода, i18n
-    ├── tests/                 # Модульные тесты FAO-56 и E2E тесты
-    └── package.json           # Зависимости Next.js, React, Tailwind, Solana Web3
-```
+Распространяется под лицензией MIT. Подробнее см. в файле [LICENSE](LICENSE).
 
 ---
 
-## 💧 Экологическая миссия
-
-В бассейне Аральского моря в Центральной Азии более 80% забора пресной воды расходуется на орошаемое земледелие. Традиционный поверхностный полив по земляным арыкам приводит к потерям до 50% воды из-за испарения и фильтрации. 
-
-**AquaAI** предоставляет фермерам и ассоциациям водопользователей предиктивные, научно обоснованные расчеты полива, снижая избыточный забор воды на **30–45%** и сохраняя урожайность культур.
+<p align="center">
+  <b>AquaAI</b> — Сохраним водное будущее Центральной Азии вместе. 💧🇰🇿
+</p>

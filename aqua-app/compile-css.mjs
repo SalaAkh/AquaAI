@@ -1,40 +1,44 @@
-import { compile } from '@tailwindcss/node';
 import fs from 'node:fs';
 import path from 'node:path';
 
 async function buildCss() {
-  const compiler = await compile('@import "tailwindcss";', {
-    base: process.cwd(),
-    onDependency: () => {},
-  });
-  console.log('Tailwind compiler initialized.');
+  const globalsPath = path.join(process.cwd(), 'src', 'app', 'globals.css');
+  
+  try {
+    const { compile } = await import('@tailwindcss/node');
+    const compiler = await compile('@import "tailwindcss";', {
+      base: process.cwd(),
+      onDependency: () => {},
+    });
+    console.log('Tailwind compiler initialized.');
 
-  // Collect candidate strings from all files in src
-  const files = [];
-  function scan(dir) {
-    for (const f of fs.readdirSync(dir)) {
-      const p = path.join(dir, f);
-      if (fs.statSync(p).isDirectory()) {
-        if (f !== 'node_modules' && f !== '.next') scan(p);
-      } else if (/\.(tsx|ts|jsx|js|html)$/.test(f)) {
-        files.push(p);
+    // Collect candidate strings from all files in src
+    const files = [];
+    function scan(dir) {
+      if (!fs.existsSync(dir)) return;
+      for (const f of fs.readdirSync(dir)) {
+        const p = path.join(dir, f);
+        if (fs.statSync(p).isDirectory()) {
+          if (f !== 'node_modules' && f !== '.next') scan(p);
+        } else if (/\.(tsx|ts|jsx|js|html)$/.test(f)) {
+          files.push(p);
+        }
       }
     }
-  }
-  scan('src');
+    scan(path.join(process.cwd(), 'src'));
 
-  const candidates = new Set();
-  for (const file of files) {
-    const content = fs.readFileSync(file, 'utf-8');
-    const matches = content.match(/[a-zA-Z0-9_\-\/\[\]\:\.\%\#]+/g) || [];
-    for (const m of matches) candidates.add(m);
-  }
+    const candidates = new Set();
+    for (const file of files) {
+      const content = fs.readFileSync(file, 'utf-8');
+      const matches = content.match(/[a-zA-Z0-9_\-\/\[\]\:\.\%\#]+/g) || [];
+      for (const m of matches) candidates.add(m);
+    }
 
-  console.log('Total candidates found:', candidates.size);
-  const compiledTailwind = compiler.build(Array.from(candidates));
-  console.log('Compiled Tailwind CSS length:', compiledTailwind.length);
+    console.log('Total candidates found:', candidates.size);
+    const compiledTailwind = compiler.build(Array.from(candidates));
+    console.log('Compiled Tailwind CSS length:', compiledTailwind.length);
 
-  const customCss = `
+    const customCss = `
 :root {
   --background: #f8fafc;
   --surface: #ffffff;
@@ -113,9 +117,20 @@ body {
 }
 `;
 
-  const finalCss = `${compiledTailwind}\n\n${customCss}`;
-  fs.writeFileSync('src/app/globals.css', finalCss, 'utf-8');
-  console.log('Successfully written full CSS to src/app/globals.css! Total length:', finalCss.length);
+    const finalCss = `${compiledTailwind}\n\n${customCss}`;
+    fs.writeFileSync(globalsPath, finalCss, 'utf-8');
+    console.log('Successfully written full CSS to src/app/globals.css! Total length:', finalCss.length);
+  } catch (err) {
+    console.warn('Tailwind compiler warning:', err.message);
+    if (fs.existsSync(globalsPath) && fs.statSync(globalsPath).size > 1000) {
+      console.log('Existing globals.css detected, proceeding with existing styles.');
+    } else {
+      throw err;
+    }
+  }
 }
 
-buildCss().catch(console.error);
+buildCss().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
