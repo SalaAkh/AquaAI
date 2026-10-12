@@ -1,0 +1,11 @@
+{
+  "name": "aqua-ai-root",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix aqua-app run dev",
+    "build": "npm --prefix aqua-app run build",
+    "start": "npm --prefix aqua-app run start",
+    "test": "npm --prefix aqua-app run test"
+  }
+}
