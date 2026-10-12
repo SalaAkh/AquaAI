@@ -161,7 +161,33 @@ flowchart TD
 
 ---
 
-### Вариант 3: Запуск в Docker контейнере
+### Вариант 3: Развертывание в Firebase (Google Cloud)
+
+Проект полностью настроен для запуска в **Firebase Hosting** и **Firebase App Hosting**:
+- Конфигурации: [`firebase.json`](firebase.json) и [`aqua-app/apphosting.yaml`](aqua-app/apphosting.yaml).
+- Поддержка Next.js SSR и API-роутов через Google Cloud Run / Functions.
+
+#### Способ А: Через консоль Firebase App Hosting (Без терминала)
+1. Откройте [Firebase Console](https://console.firebase.google.com/) и создайте или выберите проект.
+2. В левом меню выберите **Build** ➔ **App Hosting** (или **Hosting**).
+3. Нажмите **Get Started** и подключите GitHub-репозиторий `SalaAkh/AquaAI` (корневая папка `aqua-app`).
+4. Firebase автоматически соберет и опубликует сайт с глобальным CDN и SSL.
+
+#### Способ Б: Через Firebase CLI
+```bash
+# 1. Авторизация в Google Firebase (откроется окно браузера)
+npm run firebase:login
+
+# 2. Выбор или создание проекта
+npx firebase-tools use --add
+
+# 3. Деплой сайта
+npm run firebase:deploy
+```
+
+---
+
+### Вариант 4: Запуск в Docker контейнере
 
 ```bash
 # Сборка production контейнера
@@ -174,7 +200,7 @@ docker run -d -p 3000:3000 --name aqua-ai-prod aqua-ai
 
 ---
 
-### Вариант 4: Локальная разработка
+### Вариант 5: Локальная разработка
 
 ```bash
 # 1. Клонирование репозитория

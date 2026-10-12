@@ -3,21 +3,22 @@
 import React from 'react';
 import {
   Droplets,
-  Sprout,
   Clock,
   AlertTriangle,
-  Info,
   CheckCircle,
-  HelpCircle,
-  ArrowDownRight,
-  TrendingDown,
   Layers,
   FileSpreadsheet,
-  Download,
 } from 'lucide-react';
 import { FarmProfile, IrrigationRecommendation } from '@/lib/types';
-import { GROWTH_STAGE_LABELS, IRRIGATION_EFFICIENCIES } from '@/lib/constants';
-import { useTranslation } from '@/lib/i18n';
+import { IRRIGATION_EFFICIENCIES } from '@/lib/constants';
+import {
+  useTranslation,
+  getCropLabel,
+  getIrrigationMethodInfo,
+  formatLocalizedDate,
+  getLocalizedActionReason,
+  getLocalizedWindow,
+} from '@/lib/i18n';
 
 interface IrrigationCalculatorCardProps {
   recommendation: IrrigationRecommendation;
@@ -32,9 +33,8 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
   onRefresh,
   isLoading,
 }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const efficiencyInfo = IRRIGATION_EFFICIENCIES[farm.irrigationMethod];
-  const stageInfo = GROWTH_STAGE_LABELS[farm.growthStage];
 
   const getActionBadge = (action: string) => {
     switch (action) {
@@ -62,7 +62,19 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
   };
 
   const handleExportCsv = () => {
-    const headers = [
+    const headers = language === 'kk' ? [
+      'Күн',
+      'Дақыл',
+      'Өсу кезеңі',
+      'ET0 булану (мм)',
+      'ETc сұраныс (мм)',
+      'Жауын-шашын (мм)',
+      'Брутто норма (мм)',
+      'Су көлемі (м3)',
+      'Рекомендация',
+      'Суару уақыты',
+      'Негіздеме',
+    ] : language === 'ru' ? [
       'Дата',
       'Культура',
       'Фаза роста',
@@ -74,26 +86,39 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
       'Рекомендация',
       'Окно полива',
       'Обоснование',
+    ] : [
+      'Date',
+      'Crop',
+      'Growth Stage',
+      'ET0 Evapotranspiration (mm)',
+      'ETc Demand (mm)',
+      'Precipitation (mm)',
+      'Gross Depth (mm)',
+      'Volume (m3)',
+      'Recommendation',
+      'Timing Window',
+      'Reasoning',
     ];
+
     const rows = recommendation.schedule.map((day) => [
-      day.dayLabel,
-      farm.cropType,
+      formatLocalizedDate(day.date, language),
+      getCropLabel(farm.cropType, t),
       farm.growthStage,
       day.et0Mm,
       day.etcMm,
       day.precipitationMm,
       day.grossIrrigationMm,
       day.waterVolumeM3,
-      day.action === 'irrigate' ? 'Необходим полив' : day.action === 'delay' ? 'Отложить' : 'Пропустить',
-      day.recommendedWindow,
-      `"${day.actionReason.replace(/"/g, '""')}"`,
+      day.action === 'irrigate' ? t.primaryActionIrrigate : day.action === 'delay' ? t.primaryActionDelay : t.primaryActionNoNeed,
+      getLocalizedWindow(day.recommendedWindow, language),
+      `"${getLocalizedActionReason(day.action, language, day.precipitationMm).replace(/"/g, '""')}"`,
     ]);
     const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `AquaAI_Поливной_наряд_${farm.name.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}_${recommendation.periodStart}.csv`;
+    link.download = `AquaAI_Schedule_${farm.name.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}_${recommendation.periodStart}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -106,23 +131,23 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                FAO-56 Irrigation Directive
+                {t.faoDirective}
               </span>
               <span className="text-xs text-slate-400">
                 {recommendation.periodStart} — {recommendation.periodEnd}
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-              {t.grossIrrigationDepth}: {recommendation.totalGrossIrrigationMm} mm ({recommendation.forecastDays} дней)
+              {t.grossIrrigationDepth}: {recommendation.totalGrossIrrigationMm} mm
             </h2>
             <p className="mt-1 text-sm text-slate-300">
-              {t.totalVolume}: <strong className="text-white font-semibold">{recommendation.totalVolumeM3.toLocaleString()} м³</strong> на {farm.fieldSizeHectares} {t.hectares}
+              {t.totalVolume}: <strong className="text-white font-semibold">{recommendation.totalVolumeM3.toLocaleString()} м³</strong> ({farm.fieldSizeHectares} {t.hectares})
             </p>
           </div>
 
           <div className="flex flex-col sm:items-end gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-300">Статус:</span>
+              <span className="text-xs text-slate-300">{t.statusLabel}</span>
               {getActionBadge(recommendation.primaryAction === 'irrigate' ? 'irrigate' : 'skip')}
             </div>
             <button
@@ -130,7 +155,7 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
               disabled={isLoading}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-all backdrop-blur-xs disabled:opacity-50"
             >
-              {isLoading ? 'Пересчёт...' : t.refreshWeatherBtn}
+              {isLoading ? t.recalculating : t.refreshWeatherBtn}
             </button>
           </div>
         </div>
@@ -140,10 +165,10 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
           <div className="flex items-center gap-2 text-sky-200">
             <Clock className="w-4 h-4 text-cyan-400 flex-shrink-0" />
             <span>
-              <strong>Рекомендуемое окно полива:</strong> {recommendation.recommendedWindowSummary}
+              <strong>{t.recommendedWindowLabel}</strong> {getLocalizedWindow(recommendation.recommendedWindowSummary, language)}
             </span>
           </div>
-          <span className="text-[11px] text-cyan-300">Минимизирует дневное испарение и ветровой снос</span>
+          <span className="text-[11px] text-cyan-300">{t.windowMinimizesEvap}</span>
         </div>
       </div>
 
@@ -165,7 +190,7 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
               {recommendation.totalEtcMm} <span className="text-xs font-normal text-slate-500">mm</span>
             </div>
             <div className="text-[11px] text-slate-500 mt-0.5">
-              Kc: {recommendation.schedule[0]?.kc ?? 1.0} ({farm.cropType})
+              Kc: {recommendation.schedule[0]?.kc ?? 1.0} ({getCropLabel(farm.cropType, t)})
             </div>
           </div>
 
@@ -176,13 +201,13 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
               {recommendation.totalEffectiveRainfallMm} <span className="text-xs font-normal text-slate-500">mm</span>
             </div>
             <div className="text-[11px] text-slate-500 mt-0.5">
-              Всего осадков: {recommendation.totalPrecipitationMm} mm
+              {t.totalRainLabel} {recommendation.totalPrecipitationMm} mm
             </div>
           </div>
 
           {/* Net Requirement */}
           <div className="p-3 bg-white rounded-xl border border-slate-200">
-            <div className="text-[11px] font-medium text-slate-500 uppercase">Чистый дефицит (Inet)</div>
+            <div className="text-[11px] font-medium text-slate-500 uppercase">{t.netDeficit}</div>
             <div className="mt-1 text-xl font-bold text-amber-700">
               {recommendation.totalNetIrrigationMm} <span className="text-xs font-normal text-slate-500">mm</span>
             </div>
@@ -196,7 +221,7 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
               {recommendation.totalGrossIrrigationMm} <span className="text-xs font-normal text-slate-500">mm</span>
             </div>
             <div className="text-[11px] text-slate-500 mt-0.5">
-              {farm.irrigationMethod} ({Math.round(efficiencyInfo.efficiency * 100)}% КПД)
+              {getIrrigationMethodInfo(farm.irrigationMethod, t).title} ({Math.round(efficiencyInfo.efficiency * 100)}% {t.efficiency})
             </div>
           </div>
         </div>
@@ -211,10 +236,10 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
           <button
             onClick={handleExportCsv}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors shadow-2xs"
-            title="Скачать суточный поливной наряд в Excel/CSV"
+            title={t.exportCsvBtn}
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Экспорт наряда (.CSV)</span>
+            <span>{t.exportCsvBtn}</span>
           </button>
         </div>
         <div className="overflow-x-auto">
@@ -225,17 +250,16 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
                 <th className="pb-2.5 font-semibold text-right">{t.cropDemandHeader}</th>
                 <th className="pb-2.5 font-semibold text-right">{t.rainHeader}</th>
                 <th className="pb-2.5 font-semibold text-right">{t.grossIrrigationDepth}</th>
-                <th className="pb-2.5 font-semibold text-right">Объём (м³)</th>
-                <th className="pb-2.5 font-semibold text-center">Действие</th>
-                <th className="pb-2.5 font-semibold hidden md:table-cell pl-4">Время и пояснение</th>
+                <th className="pb-2.5 font-semibold text-right">{t.volumeM3Header}</th>
+                <th className="pb-2.5 font-semibold text-center">{t.actionHeader}</th>
+                <th className="pb-2.5 font-semibold hidden md:table-cell pl-4">{t.timingHeader}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {recommendation.schedule.map((day) => (
                 <tr key={day.date} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3 font-medium text-slate-900">
-                    <div>{day.dayLabel}</div>
-                    <div className="text-[11px] text-slate-400">{day.conditionLabel}</div>
+                    <div>{formatLocalizedDate(day.date, language)}</div>
                   </td>
                   <td className="py-3 text-right">
                     <span className="font-semibold text-slate-800">{day.etcMm} mm</span>
@@ -257,8 +281,8 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
                     {getActionBadge(day.action)}
                   </td>
                   <td className="py-3 hidden md:table-cell pl-4">
-                    <div className="text-slate-800 font-medium">{day.recommendedWindow}</div>
-                    <div className="text-[11px] text-slate-500">{day.actionReason}</div>
+                    <div className="text-slate-800 font-medium">{getLocalizedWindow(day.recommendedWindow, language)}</div>
+                    <div className="text-[11px] text-slate-500">{getLocalizedActionReason(day.action, language, day.precipitationMm)}</div>
                   </td>
                 </tr>
               ))}
@@ -273,16 +297,16 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
           <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
           <div className="space-y-1">
             <div className="font-bold text-amber-900">
-              Гидрологические допущения и границы применимости модели
+              {t.assumptionsTitle}
             </div>
             <p className="text-amber-800 leading-relaxed">
-              Стандарт: <strong>{recommendation.assumptions.faoStandard}</strong>. Объёмный пересчёт: <strong>1 мм на 1 га = 10 м³</strong>.
-              КПД поливной сети: <strong>{Math.round(recommendation.assumptions.irrigationEfficiency * 100)}%</strong> ({farm.irrigationMethod}).
+              {t.standard} <strong>{recommendation.assumptions.faoStandard}</strong>. {t.volumeConversionNote}{' '}
+              {t.networkEfficiency} <strong>{Math.round(recommendation.assumptions.irrigationEfficiency * 100)}%</strong> ({getIrrigationMethodInfo(farm.irrigationMethod, t).title}).
             </p>
             <ul className="list-disc list-inside text-[11px] text-amber-800/90 space-y-0.5 pt-1">
-              {recommendation.limitations.map((lim, idx) => (
-                <li key={idx}>{lim}</li>
-              ))}
+              <li>{t.limitation1}</li>
+              <li>{t.limitation2}</li>
+              <li>{t.limitation3}</li>
             </ul>
           </div>
         </div>

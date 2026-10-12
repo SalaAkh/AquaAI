@@ -17,7 +17,7 @@ import { DailyWeatherForecast, FarmProfile, IrrigationRecommendation, OnChainPro
 import { DEMO_FARM_TURKISTAN } from '@/lib/constants';
 import { calculateIrrigationRecommendation } from '@/lib/fao56';
 import { fetchOpenMeteoForecast, generateCentralAsiaFallbackForecast } from '@/lib/weather';
-import { LanguageProvider, useTranslation } from '@/lib/i18n';
+import { LanguageProvider, useTranslation, getCropLabel, getGrowthStageInfo } from '@/lib/i18n';
 import { WalletProvider } from '@/lib/wallet';
 import {
   getActiveFarmId,
@@ -208,7 +208,9 @@ function DashboardApp() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-slate-900">{currentFarm.name}</h1>
+                <h1 className="text-lg font-bold text-slate-900">
+                  {currentFarm.id === DEMO_FARM_TURKISTAN.id ? t.demoTurkistanName : currentFarm.name}
+                </h1>
                 {currentFarm.isDemo ? (
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
                     {t.demoFarmBadge}
@@ -225,7 +227,7 @@ function DashboardApp() {
                 <span>•</span>
                 <span>{currentFarm.fieldSizeHectares} {t.hectares}</span>
                 <span>•</span>
-                <span className="capitalize">{currentFarm.cropType} ({currentFarm.growthStage.replace('_', ' ')})</span>
+                <span>{getCropLabel(currentFarm.cropType, t)} ({getGrowthStageInfo(currentFarm.growthStage, t).title})</span>
               </p>
             </div>
           </div>
@@ -380,21 +382,21 @@ function DashboardApp() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Droplets className="w-4 h-4 text-sky-600" />
-            <span className="font-semibold text-slate-800">AquaAI Systems</span>
+            <span className="font-semibold text-slate-800">{t.footerSystems}</span>
             <span>•</span>
-            <span>Central Asia Climate Resilience</span>
+            <span>{t.footerResilience}</span>
           </div>
 
           <div className="flex items-center gap-4 text-slate-600">
-            <span>FAO-56 Irrigation Engine</span>
+            <span>{t.badgeFao}</span>
             <span>•</span>
-            <span>Sentinel-2 NDVI Satellite</span>
+            <span>{t.tabSatellite}</span>
             <span>•</span>
-            <span>Solana Devnet Audit</span>
+            <span>{t.tabBlockchain}</span>
           </div>
 
           <div className="text-[11px] text-slate-400">
-            &copy; 2026 AquaAI. Қазақстан және Орталық Азия су ресурстарын сақтау.
+            {t.footerCopyright}
           </div>
         </div>
       </footer>

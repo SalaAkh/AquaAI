@@ -3,18 +3,15 @@
 import React from 'react';
 import {
   Droplets,
-  Sprout,
   ShieldCheck,
-  TrendingUp,
   Cpu,
   ArrowRight,
   CloudSun,
   Layers,
   MapPin,
-  CheckCircle2,
 } from 'lucide-react';
 import { FarmProfile } from '@/lib/types';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, getCropLabel } from '@/lib/i18n';
 
 interface LandingHeroProps {
   onLaunchDashboard: () => void;
@@ -39,9 +36,9 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
         <div className="flex justify-center mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-sky-200 shadow-xs text-xs font-medium text-slate-700">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-sky-800">Colosseum Crypto World&apos;s Fair 2026</span>
+            <span className="font-semibold text-sky-800">{t.heroColosseumBadge}</span>
             <span className="text-slate-300">|</span>
-            <span className="text-slate-600">Central Asia Climate Tech MVP</span>
+            <span className="text-slate-600">{t.heroColosseumSub}</span>
           </div>
         </div>
 
@@ -85,7 +82,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
                   {farm.name}
                 </span>
                 <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium border border-emerald-200">
-                  {farm.fieldSizeHectares} {t.hectares} • {farm.cropType.toUpperCase()}
+                  {farm.fieldSizeHectares} {t.hectares} • {getCropLabel(farm.cropType, t)}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -114,7 +111,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
               <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
                 <div className="text-[11px] font-medium text-emerald-800 uppercase">{t.savedWaterMetric}</div>
                 <div className="mt-1 text-xl sm:text-2xl font-bold text-emerald-700">5,472 <span className="text-xs font-normal text-emerald-600">m³</span></div>
-                <div className="text-[11px] text-emerald-600 mt-0.5">vs 50% flood baseline</div>
+                <div className="text-[11px] text-emerald-600 mt-0.5">{t.vsFloodBaseline}</div>
               </div>
             </div>
 
@@ -123,7 +120,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
               <div className="flex items-center gap-2">
                 <Droplets className="w-4 h-4 text-sky-600 flex-shrink-0" />
                 <span>
-                  <strong>{t.operationalAdviceTitle}:</strong> Оптимальное окно полива — утренние часы (05:30 – 08:30) до наступления суховея.
+                  <strong>{t.heroAdviceCallout}:</strong> {t.heroAdviceText}
                 </span>
               </div>
               <button
@@ -144,7 +141,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             </div>
             <h2 className="text-sm font-bold text-slate-900">{t.badgeFao}</h2>
             <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-              Пенман-Монтейт и коэффициенты Kc культур для хлопка, пшеницы, риса и овощей.
+              {t.faoPillarDesc}
             </p>
           </div>
 
@@ -154,7 +151,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             </div>
             <h2 className="text-sm font-bold text-slate-900">{t.badgeWeather}</h2>
             <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-              7-дневный численный метеопрогноз Open-Meteo: осадки, радиация, испарение ET0.
+              {t.weatherPillarDesc}
             </p>
           </div>
 
@@ -164,7 +161,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             </div>
             <h2 className="text-sm font-bold text-slate-900">{t.badgeGemini}</h2>
             <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-              ИИ переводит сложные гидрологические формулы в ясные практические указания поливальщикам.
+              {t.geminiPillarDesc}
             </p>
           </div>
 
@@ -174,7 +171,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             </div>
             <h2 className="text-sm font-bold text-slate-900">{t.badgeSolana}</h2>
             <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-              Криптографическая фиксация директив в блокчейне Solana Devnet через транзакции Memo.
+              {t.solanaPillarDesc}
             </p>
           </div>
         </div>

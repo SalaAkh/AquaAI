@@ -101,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {farms.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.isDemo ? '🧪 ' : '🌾 '}
-                    {f.name}
+                    {f.id === 'demo-turkistan-cotton' ? t.demoTurkistanName : f.name}
                   </option>
                 ))}
               </select>
@@ -145,38 +145,41 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white active:scale-95 transition-all shadow-2xs shrink-0"
               >
                 <Wallet className="w-3.5 h-3.5 text-purple-200" />
-                <span>{isConnecting ? '...' : t.connectWalletBtn}</span>
+                <span>{isConnecting ? t.connecting : t.connectWalletBtn}</span>
               </button>
             )}
 
             {/* Language Selector Pill */}
-            <div className="flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-0.5 text-[11px] font-bold text-slate-600 shadow-2xs shrink-0">
+            <div
+              className="flex items-center bg-slate-100 border border-slate-200/80 rounded-xl p-0.5 text-[11px] font-bold text-slate-600 shadow-2xs shrink-0"
+              aria-label="Language Selector"
+            >
               <button
                 onClick={() => setLanguage('ru')}
                 className={`px-2 py-1 rounded-lg transition-all ${
-                  language === 'ru' ? 'bg-white text-slate-900 shadow-2xs font-extrabold' : 'hover:text-slate-900'
+                  language === 'ru' ? 'bg-white text-slate-900 shadow-2xs font-extrabold ring-1 ring-slate-200/80' : 'hover:text-slate-900'
                 }`}
-                title="Русский"
+                title="Русский язык"
               >
                 RU
               </button>
               <button
                 onClick={() => setLanguage('kk')}
                 className={`px-2 py-1 rounded-lg transition-all ${
-                  language === 'kk' ? 'bg-white text-emerald-800 shadow-2xs font-extrabold' : 'hover:text-slate-900'
+                  language === 'kk' ? 'bg-white text-emerald-800 shadow-2xs font-extrabold ring-1 ring-emerald-200/80' : 'hover:text-slate-900'
                 }`}
-                title="Қазақша"
+                title="Қазақ тілі"
               >
-                KZ
+                ҚАЗ
               </button>
               <button
                 onClick={() => setLanguage('en')}
                 className={`px-2 py-1 rounded-lg transition-all ${
-                  language === 'en' ? 'bg-white text-sky-800 shadow-2xs font-extrabold' : 'hover:text-slate-900'
+                  language === 'en' ? 'bg-white text-sky-800 shadow-2xs font-extrabold ring-1 ring-sky-200/80' : 'hover:text-slate-900'
                 }`}
-                title="English"
+                title="English Language"
               >
-                EN
+                ENG
               </button>
             </div>
           </div>

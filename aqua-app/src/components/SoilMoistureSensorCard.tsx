@@ -1,17 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { FarmProfile } from '@/lib/types';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, getCropLabel } from '@/lib/i18n';
 import {
   Radio,
   Wifi,
   BatteryCharging,
-  Layers,
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Sparkles,
   Droplets,
   Activity,
 } from 'lucide-react';
@@ -22,7 +20,7 @@ interface SoilMoistureSensorCardProps {
 
 interface DepthReading {
   depthCm: number;
-  label: string;
+  labelKey: 'depth20Label' | 'depth40Label' | 'depth60Label';
   vwcPercent: number; // Volumetric Water Content
   wiltingPoint: number;
   madThreshold: number; // Management Allowed Depletion threshold
@@ -31,13 +29,12 @@ interface DepthReading {
 }
 
 export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ farm }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
-  // Realistic sensor readings calibrated for soil type
-  const [readings] = useState<DepthReading[]>([
+  const readings: DepthReading[] = useMemo(() => [
     {
       depthCm: 20,
-      label: 'Поверхностный слой (испарение)',
+      labelKey: 'depth20Label',
       vwcPercent: 19.4,
       wiltingPoint: 11.0,
       madThreshold: 20.5,
@@ -46,7 +43,7 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
     },
     {
       depthCm: 40,
-      label: 'Основной корневой горизонт (активное водопотребление)',
+      labelKey: 'depth40Label',
       vwcPercent: 26.8,
       wiltingPoint: 12.0,
       madThreshold: 21.0,
@@ -55,42 +52,53 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
     },
     {
       depthCm: 60,
-      label: 'Глубинный буферный горизонт (капиллярный подпор)',
+      labelKey: 'depth60Label',
       vwcPercent: 30.2,
       wiltingPoint: 13.0,
       madThreshold: 22.0,
       fieldCapacity: 33.0,
       status: 'optimal',
     },
-  ]);
+  ], []);
 
   const getStatusBadge = (status: DepthReading['status']) => {
     switch (status) {
       case 'optimal':
         return (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-            <CheckCircle2 className="w-3 h-3" /> Оптимально
+            <CheckCircle2 className="w-3 h-3" /> {t.statusOptimal}
           </span>
         );
       case 'moderate_deficit':
         return (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-            <AlertTriangle className="w-3 h-3" /> Умеренный дефицит
+            <AlertTriangle className="w-3 h-3" /> {t.statusModerateDeficit}
           </span>
         );
       case 'critical_dry':
         return (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800">
-            <AlertTriangle className="w-3 h-3" /> Критический дефицит
+            <AlertTriangle className="w-3 h-3" /> {t.statusCriticalDry}
           </span>
         );
       case 'saturated':
         return (
           <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
-            <Droplets className="w-3 h-3" /> Переувлажнение
+            <Droplets className="w-3 h-3" /> {t.statusSaturated}
           </span>
         );
     }
+  };
+
+  const getInterpretationText = () => {
+    const cropName = getCropLabel(farm.cropType, t);
+    if (language === 'kk') {
+      return `${cropName} дақылының негізгі тамыр массасы 40 см тереңдікте шоғырланған, онда ылғалдылық 26.8% (қауіпті 21.0% шегінен жоғары). 20 см беткі қабат күн сәулесінен тез кебеді, бірақ белсенді тамыр аймағындағы ылғал қоры суаруды таңғы уақытқа дейін шегеруге жеткілікті.`;
+    }
+    if (language === 'ru') {
+      return `Основная масса корней культуры ${cropName} сосредоточена в горизонте 40 см, где влажность составляет 26.8% (выше критического порога 21.0%). Поверхностный слой 20 см подсыхает быстрее из-за солнечной инсоляции, однако запаса влаги в корневой зоне достаточно для отсрочки полива до рекомендованного утреннего окна.`;
+    }
+    return `The active root mass of ${cropName} is concentrated in the 40 cm horizon, where moisture is 26.8% (well above the 21.0% MAD threshold). The 20 cm surface layer evaporates faster under solar irradiance, but deep root reserve is adequate to defer application until the morning window.`;
   };
 
   return (
@@ -100,13 +108,13 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 text-xs font-semibold border border-indigo-200/80 mb-2">
             <Radio className="w-3.5 h-3.5" />
-            <span>LoRaWAN IoT-телеметрия зондов</span>
+            <span>{t.loraTelemetryBadge}</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <span>Влажность почвы в корнеобитаемом профиле</span>
+            <span>{t.soilTelemetryTitle}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Данные ёмкостных датчиков VWC (%) на глубинах 20, 40 и 60 см для контроля порога допустимого истощения (MAD).
+            {t.soilTelemetrySubtitle}
           </p>
         </div>
 
@@ -122,7 +130,7 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
           </div>
           <div className="flex items-center gap-1 px-2.5 py-1 text-[11px] text-slate-400">
             <Clock className="w-3 h-3" />
-            <span>3 мин назад</span>
+            <span>{t.minsAgo}</span>
           </div>
         </div>
       </div>
@@ -130,10 +138,10 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
       {/* 3 Depth Horizons Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {readings.map((r) => {
-          // Progress calculation: 0 to 40% VWC scale
           const fillWidth = Math.min(100, Math.max(0, (r.vwcPercent / 38) * 100));
           const madPosition = (r.madThreshold / 38) * 100;
           const fcPosition = (r.fieldCapacity / 38) * 100;
+          const depthLabel = t[r.labelKey];
 
           return (
             <div
@@ -146,8 +154,8 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
                     -{r.depthCm}
                   </div>
                   <div>
-                    <span className="font-bold text-slate-900 text-sm">Глубина {r.depthCm} см</span>
-                    <p className="text-[10px] text-slate-400 line-clamp-1">{r.label}</p>
+                    <span className="font-bold text-slate-900 text-sm">-{r.depthCm} cm</span>
+                    <p className="text-[10px] text-slate-400 line-clamp-1">{depthLabel}</p>
                   </div>
                 </div>
                 {getStatusBadge(r.status)}
@@ -157,10 +165,10 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
               <div className="flex items-baseline justify-between pt-1">
                 <div>
                   <span className="text-3xl font-extrabold text-slate-900">{r.vwcPercent}%</span>
-                  <span className="text-xs text-slate-500 ml-1.5 font-medium">VWC (объёмная влажность)</span>
+                  <span className="text-xs text-slate-500 ml-1.5 font-medium">VWC</span>
                 </div>
                 <div className="text-right text-[11px] text-slate-400">
-                  <div>ППВ: {r.fieldCapacity}%</div>
+                  <div>{t.fieldCapacityShort}: {r.fieldCapacity}%</div>
                   <div>MAD: {r.madThreshold}%</div>
                 </div>
               </div>
@@ -182,19 +190,19 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
                   <div
                     style={{ left: `${madPosition}%` }}
                     className="absolute top-0 bottom-0 w-0.5 bg-amber-600/80"
-                    title={`Порог истощения MAD (${r.madThreshold}%)`}
+                    title={`MAD (${r.madThreshold}%)`}
                   />
                   {/* Vertical line for Field Capacity */}
                   <div
                     style={{ left: `${fcPosition}%` }}
                     className="absolute top-0 bottom-0 w-0.5 bg-sky-700/80"
-                    title={`Полевая влагоёмкость (${r.fieldCapacity}%)`}
+                    title={`FC (${r.fieldCapacity}%)`}
                   />
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-400 pt-0.5">
-                  <span>Увядание ({r.wiltingPoint}%)</span>
-                  <span className="text-amber-700 font-semibold">Порог полива (MAD)</span>
-                  <span className="text-sky-700 font-semibold">ППВ (100%)</span>
+                  <span>{t.wiltingPointShort} ({r.wiltingPoint}%)</span>
+                  <span className="text-amber-700 font-semibold">{t.madThresholdShort}</span>
+                  <span className="text-sky-700 font-semibold">{t.fieldCapacityShort}</span>
                 </div>
               </div>
             </div>
@@ -207,10 +215,10 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
         <Activity className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
         <div className="space-y-0.5">
           <span className="font-bold text-indigo-900">
-            Синхронизация гидромодели FAO-56 и телеметрии зонда:
+            FAO-56 &amp; LoRaWAN:
           </span>
           <p className="text-indigo-800 leading-relaxed">
-            Основная масса корней культуры <strong>{farm.cropType}</strong> сосредоточена в горизонте 40 см, где влажность составляет <strong>26.8%</strong> (выше критического порога 21.0%). Поверхностный слой 20 см подсыхает быстрее из-за солнечной инсоляции, однако запаса влаги в корневой зоне достаточно для отсрочки полива до рекомендованного утреннего окна.
+            {getInterpretationText()}
           </p>
         </div>
       </div>

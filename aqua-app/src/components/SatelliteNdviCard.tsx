@@ -6,15 +6,11 @@ import { generateSatelliteObservation, getNdviColor, getNdwiColor } from '@/lib/
 import { useTranslation } from '@/lib/i18n';
 import {
   Satellite,
-  Layers,
-  Sparkles,
-  Droplets,
-  Calendar,
   Eye,
-  Info,
   CheckCircle2,
-  AlertTriangle,
   Compass,
+  Calendar,
+  Sparkles,
 } from 'lucide-react';
 
 interface SatelliteNdviCardProps {
@@ -46,6 +42,38 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
     }
   };
 
+  const getSectorStressText = (stress: SatellitePixel['waterStress']) => {
+    if (language === 'kk') {
+      if (stress === 'optimal') return 'Оңтайлы ылғал';
+      if (stress === 'mild_deficit') return 'Шамалы тапшылық';
+      return 'Қатты тапшылық';
+    }
+    if (language === 'ru') {
+      if (stress === 'optimal') return 'Оптимальный';
+      if (stress === 'mild_deficit') return 'Умеренный дефицит';
+      return 'Острый дефицит';
+    }
+    if (stress === 'optimal') return 'Optimal';
+    if (stress === 'mild_deficit') return 'Mild Deficit';
+    return 'Severe Stress';
+  };
+
+  const getSectorAdviceText = (stress: SatellitePixel['waterStress']) => {
+    if (language === 'kk') {
+      if (stress === 'optimal') return 'Жапырақ біркелкі дамыған. Суару нормасын өзгерту қажет емес.';
+      if (stress === 'mild_deficit') return 'Жергілікті құрғау байқалды. Тамшылату желісін тексеру ұсынылады.';
+      return 'Назар аударыңыз: солу қаупі жоғары. Секторды шұғыл суару қажет!';
+    }
+    if (language === 'ru') {
+      if (stress === 'optimal') return 'Равномерное развитие листовой пластины. Снижение нормы полива не требуется.';
+      if (stress === 'mild_deficit') return 'Зафиксировано локальное иссушение. Рекомендуется проверить капельные линии сектора.';
+      return 'Внимание: высокий риск увядания. Требуется приоритетный полив сектора!';
+    }
+    if (stress === 'optimal') return 'Uniform canopy development. No reduction in irrigation needed.';
+    if (stress === 'mild_deficit') return 'Localized drying detected. Inspect emitter drip lines in this sector.';
+    return 'Warning: high wilting risk. Prioritize immediate irrigation delivery to this sector!';
+  };
+
   return (
     <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-8 space-y-6">
       {/* Header */}
@@ -56,10 +84,10 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
             <span>Sentinel-2 MSI • ESA Copernicus L2A</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <span>Спутниковый мониторинг NDVI & Водного стресса</span>
+            <span>{t.satelliteTitle}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Спектральный анализ вегетационных индексов по 10-метровым каналам B04 (Red) и B08 (NIR) для динамической калибровки коэффициента культуры Kc.
+            {t.satelliteSubtitle}
           </p>
         </div>
 
@@ -72,7 +100,7 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            Слой NDVI (Биомасса)
+            {t.layerNdvi}
           </button>
           <button
             onClick={() => setViewMode('ndwi')}
@@ -82,7 +110,7 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            Слой NDWI (Влага)
+            {t.layerNdwi}
           </button>
         </div>
       </div>
@@ -92,43 +120,43 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
         {/* Metric 1: Mean NDVI */}
         <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100">
           <div className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider">
-            Средний индекс NDVI
+            {t.meanNdvi}
           </div>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-emerald-950">
               {data.meanNdvi}
             </span>
             <span className="text-xs font-semibold text-emerald-700">
-              {data.meanNdvi >= 0.7 ? 'Густой покров' : 'Умеренный рост'}
+              {data.meanNdvi >= 0.7 ? t.denseCover : t.moderateCover}
             </span>
           </div>
           <p className="text-[11px] text-emerald-700/80 mt-1">
-            Диапазон: {data.minNdvi} – {data.maxNdvi}
+            {t.rangeLabel} {data.minNdvi} – {data.maxNdvi}
           </p>
         </div>
 
         {/* Metric 2: NDWI Water Stress */}
         <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-100">
           <div className="text-[11px] font-semibold text-sky-800 uppercase tracking-wider">
-            Водный стресс (NDWI)
+            {t.ndwiWaterStress}
           </div>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-sky-950">
               {data.meanNdwi > 0 ? `+${data.meanNdwi}` : data.meanNdwi}
             </span>
             <span className="text-xs font-semibold text-sky-700">
-              {data.waterStressStatus === 'optimal_hydration' ? 'В норме' : 'Дефицит влаги'}
+              {data.waterStressStatus === 'optimal_hydration' ? t.normalHydration : t.moistureDeficit}
             </span>
           </div>
           <p className="text-[11px] text-sky-700/80 mt-1">
-            Тургор листового аппарата
+            {t.turgorLabel}
           </p>
         </div>
 
         {/* Metric 3: Dynamic Kc Adjustment */}
         <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-100">
           <div className="text-[11px] font-semibold text-teal-800 uppercase tracking-wider">
-            Коррекция Kc (FAO-56)
+            {t.kcCorrectionFao}
           </div>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-teal-950">
@@ -139,26 +167,26 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
             </span>
           </div>
           <p className="text-[11px] text-teal-700/80 mt-1">
-            Базовый табличный Kc: {data.faoBaselineKc}
+            FAO: {data.faoBaselineKc} → {data.satelliteAdjustedKc}
           </p>
         </div>
 
         {/* Metric 4: Uniformity */}
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
           <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
-            Однородность алқапа (CU)
+            CU Uniformity
           </div>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               {data.spatialUniformityPercent}%
             </span>
             <span className="text-xs font-medium text-slate-500">
-              Облачность: {data.cloudCoverPercent}%
+              {data.cloudCoverPercent}% cloud
             </span>
           </div>
           <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
             <Calendar className="w-3 h-3 text-slate-400" />
-            <span>Снимок от {data.acquisitionDate}</span>
+            <span>{data.acquisitionDate}</span>
           </p>
         </div>
       </div>
@@ -171,11 +199,11 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
             <div className="flex items-center gap-2">
               <Compass className="w-4 h-4 text-cyan-400" />
               <span className="font-semibold text-slate-200">
-                Спектральная сетка полей ({farm.fieldSizeHectares} га • Сектора 10x10м)
+                {t.interactiveNdviGrid}
               </span>
             </div>
             <span className="text-slate-400 text-[11px]">
-              Режим: <strong className="text-cyan-300 uppercase">{viewMode}</strong>
+              <strong className="text-cyan-300 uppercase">{viewMode}</strong>
             </span>
           </div>
 
@@ -196,7 +224,7 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
                       className={`aspect-square rounded-lg flex flex-col items-center justify-center text-[10px] font-bold text-white shadow-xs transition-all hover:scale-110 active:scale-95 ${
                         isSelected ? 'ring-2 ring-white scale-110 z-10' : 'opacity-90 hover:opacity-100'
                       }`}
-                      title={`Сектор [${rIdx + 1}, ${cIdx + 1}] | NDVI: ${pixel.ndvi}`}
+                      title={`[${rIdx + 1}, ${cIdx + 1}] | NDVI: ${pixel.ndvi}`}
                     >
                       <span className="drop-shadow-xs">{val}</span>
                     </button>
@@ -210,18 +238,18 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
           <div className="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-400">
             {viewMode === 'ndvi' ? (
               <div className="flex items-center gap-2">
-                <span>Дефицит покрова (&lt;0.3)</span>
+                <span>{t.ndviLegendLow}</span>
                 <div className="h-2 w-32 rounded-full bg-gradient-to-r from-red-400 via-amber-400 via-lime-400 to-emerald-600" />
-                <span>Густая биомасса (&gt;0.75)</span>
+                <span>{t.ndviLegendHigh}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span>Водный стресс (&lt;-0.15)</span>
+                <span>&lt; -0.15</span>
                 <div className="h-2 w-32 rounded-full bg-gradient-to-r from-red-500 via-amber-500 to-sky-500" />
-                <span>Оптимальная влага (&gt;0.05)</span>
+                <span>&gt; +0.05</span>
               </div>
             )}
-            <span className="text-[10px] text-slate-500">Кликните по сектору для детальной инспекции</span>
+            <span className="text-[10px] text-slate-500">{t.clickPixelPrompt}</span>
           </div>
         </div>
 
@@ -230,48 +258,38 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
           <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200">
             <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Eye className="w-3.5 h-3.5 text-teal-600" />
-              Инспектор сектора
+              {t.selectedPixelTitle}
             </h4>
 
             {selectedPixel ? (
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between pb-2 border-b border-slate-200">
-                  <span className="text-slate-500">Координаты сектора:</span>
+                  <span className="text-slate-500">Grid:</span>
                   <span className="font-bold text-slate-900">
-                    Ряд {selectedPixel.row + 1}, Колонка {selectedPixel.col + 1}
+                    [{selectedPixel.row + 1}, {selectedPixel.col + 1}]
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Значение NDVI:</span>
+                  <span className="text-slate-500">NDVI:</span>
                   <span className="font-bold text-emerald-700">{selectedPixel.ndvi}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Влагонасыщенность (NDWI):</span>
+                  <span className="text-slate-500">NDWI:</span>
                   <span className="font-bold text-sky-700">{selectedPixel.ndwi}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Статус водного стресса:</span>
-                  <span className={`font-semibold ${
-                    selectedPixel.waterStress === 'optimal'
-                      ? 'text-emerald-700'
-                      : selectedPixel.waterStress === 'mild_deficit'
-                      ? 'text-amber-700'
-                      : 'text-red-700'
-                  }`}>
-                    {selectedPixel.waterStress === 'optimal' ? 'Оптимальный' : selectedPixel.waterStress === 'mild_deficit' ? 'Легкий дефицит' : 'Острый стресс'}
+                  <span className="text-slate-500">{t.turgorLabel}:</span>
+                  <span className="font-semibold text-emerald-700">
+                    {getSectorStressText(selectedPixel.waterStress)}
                   </span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-[11px] text-slate-600">
-                  {selectedPixel.waterStress === 'optimal'
-                    ? 'Равномерное развитие листовой пластины. Снижение нормы полива не требуется.'
-                    : selectedPixel.waterStress === 'mild_deficit'
-                    ? 'Зафиксировано локальное иссушение. Рекомендуется проверить капельные линии сектора.'
-                    : 'Внимание: высокий риск увядания. Требуется приоритетный полив сектора!'}
+                  {getSectorAdviceText(selectedPixel.waterStress)}
                 </div>
               </div>
             ) : (
               <p className="text-xs text-slate-500 italic py-6 text-center">
-                Выберите любой квадрат на тепловой карте поля слева для детального агрономического аудита.
+                {t.clickPixelPrompt}
               </p>
             )}
           </div>
@@ -281,11 +299,11 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-teal-600" />
               <span className="text-xs font-bold text-teal-950">
-                Калибровка FAO-56 по спутнику
+                {t.kcCorrectionFao}
               </span>
             </div>
             <p className="text-[11px] text-teal-800/90 leading-relaxed mb-3">
-              Использование реального NDVI ({data.meanNdvi}) вместо статического календаря корректирует $K_c$ с {data.faoBaselineKc} до {data.satelliteAdjustedKc}.
+              NDVI ({data.meanNdvi}): Kc {data.faoBaselineKc} → {data.satelliteAdjustedKc}
             </p>
             <button
               onClick={handleApply}
@@ -298,10 +316,10 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
               {isApplied ? (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Поправка спутника применена!</span>
+                  <span>{t.kcApplied}</span>
                 </>
               ) : (
-                <span>Применить Kc {data.satelliteAdjustedKc} к расчёту полива</span>
+                <span>{t.applyKcBtn} ({data.satelliteAdjustedKc})</span>
               )}
             </button>
           </div>

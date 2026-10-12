@@ -1,14 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Sprout, MapPin, Gauge, Layers, Info, Check } from 'lucide-react';
+import { X, Sprout, MapPin, Check } from 'lucide-react';
 import { CropType, FarmProfile, GrowthStage, IrrigationMethod, SoilType } from '@/lib/types';
 import {
-  GROWTH_STAGE_LABELS,
-  IRRIGATION_EFFICIENCIES,
   LOCATION_PRESETS,
   SOIL_CHARACTERISTICS,
 } from '@/lib/constants';
+import {
+  useTranslation,
+  getGrowthStageInfo,
+  getIrrigationMethodInfo,
+  getSoilTypeInfo,
+} from '@/lib/i18n';
 
 interface FarmManagerModalProps {
   isOpen: boolean;
@@ -23,7 +27,8 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
   onSaveFarm,
   initialFarm,
 }) => {
-  const [name, setName] = useState(initialFarm?.name || 'Turkistan Field Alpha');
+  const { t } = useTranslation();
+  const [name, setName] = useState(initialFarm?.name || '');
   const [selectedLocationId, setSelectedLocationId] = useState(
     initialFarm?.locationId || LOCATION_PRESETS[0].id
   );
@@ -39,7 +44,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
 
   React.useEffect(() => {
     if (isOpen) {
-      setName(initialFarm?.name || (initialFarm ? '' : 'Turkistan Field Alpha'));
+      setName(initialFarm?.name || '');
       setSelectedLocationId(initialFarm?.locationId || LOCATION_PRESETS[0].id);
       setFieldSize(initialFarm?.fieldSizeHectares || 45);
       setCropType(initialFarm?.cropType || 'cotton');
@@ -80,6 +85,18 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
     onClose();
   };
 
+  const crops: { type: CropType; icon: string; label: string }[] = [
+    { type: 'cotton', icon: '🌱', label: t.cropCotton },
+    { type: 'wheat', icon: '🌾', label: t.cropWheat },
+    { type: 'rice', icon: '🌾', label: t.cropRice },
+    { type: 'corn', icon: '🌽', label: t.cropCorn },
+    { type: 'vegetables', icon: '🍅', label: t.cropVegetables },
+  ];
+
+  const irrigationMethods: IrrigationMethod[] = ['drip', 'sprinkler', 'furrow_flood'];
+  const soilTypes: SoilType[] = ['sandy_loam', 'loam', 'clay_loam', 'silt_clay'];
+  const growthStagesList: GrowthStage[] = ['initial', 'development', 'mid_season', 'late_season'];
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -91,9 +108,9 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">
-                {initialFarm ? 'Edit Farm Configuration' : 'Create New Farm Profile'}
+                {initialFarm ? t.modalTitleEdit : t.modalTitleNew}
               </h3>
-              <p className="text-xs text-slate-500">Configure regional agro-climatic parameters</p>
+              <p className="text-xs text-slate-500">{t.modalSubtitle}</p>
             </div>
           </div>
           <button
@@ -109,7 +126,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
           {/* Farm Name */}
           <div>
             <label htmlFor="farm-name" className="block text-xs font-semibold text-slate-700 mb-1">
-              Farm / Field Name
+              {t.farmNameLabel}
             </label>
             <input
               id="farm-name"
@@ -119,7 +136,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Syr Darya Co-op Sector 4"
+              placeholder={t.farmNamePlaceholder}
               className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             />
           </div>
@@ -128,10 +145,10 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label htmlFor="farm-location" className="block text-xs font-semibold text-slate-700">
-                Location in Kazakhstan & Central Asia
+                {t.locationPresetLabel}
               </label>
               <span className="text-[11px] text-slate-500">
-                Lat: {activePreset.latitude.toFixed(2)}°, Lon: {activePreset.longitude.toFixed(2)}°
+                {t.coordinates} {activePreset.latitude.toFixed(2)}°, {activePreset.longitude.toFixed(2)}°
               </span>
             </div>
             <select
@@ -157,7 +174,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="farm-field-size" className="block text-xs font-semibold text-slate-700 mb-1">
-                Field Size (Hectares)
+                {t.fieldSizeLabel}
               </label>
               <div className="relative">
                 <input
@@ -175,36 +192,36 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
                 />
                 <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">ha</span>
               </div>
-              <p className="mt-1 text-[11px] text-slate-500">1 mm depth = 10 m³ water per ha</p>
+              <p className="mt-1 text-[11px] text-slate-500">{t.depthM3Ratio}</p>
             </div>
 
             <div>
               <label htmlFor="farm-crop-type" className="block text-xs font-semibold text-slate-700 mb-1">
-                Crop Type
+                {t.cropTypeLabel}
               </label>
               <select
                 id="farm-crop-type"
                 name="cropType"
                 value={cropType}
                 onChange={(e) => setCropType(e.target.value as CropType)}
-                className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer capitalize"
+                className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer"
               >
-                <option value="wheat">🌾 Wheat (Grain / Steppe)</option>
-                <option value="cotton">🌱 Cotton (Aral Basin Cash Crop)</option>
-                <option value="rice">🌾 Rice (Kyzylorda Basin)</option>
-                <option value="corn">🌽 Corn / Maize (Fodder & Grain)</option>
-                <option value="vegetables">🍅 Vegetables (Horticulture)</option>
+                {crops.map((c) => (
+                  <option key={c.type} value={c.type}>
+                    {c.icon} {c.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           {/* Growth Stage Selector */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-2">Crop Growth Stage</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-2">{t.growthStageLabel}</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {(['initial', 'development', 'mid_season', 'late_season'] as GrowthStage[]).map((stage) => {
+              {growthStagesList.map((stage) => {
                 const isSelected = growthStage === stage;
-                const info = GROWTH_STAGE_LABELS[stage];
+                const info = getGrowthStageInfo(stage, t);
                 return (
                   <button
                     key={stage}
@@ -231,7 +248,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="farm-irrigation-method" className="block text-xs font-semibold text-slate-700 mb-1">
-                Irrigation Delivery Method
+                {t.irrigationMethodLabel}
               </label>
               <select
                 id="farm-irrigation-method"
@@ -240,18 +257,23 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
                 onChange={(e) => setIrrigationMethod(e.target.value as IrrigationMethod)}
                 className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer"
               >
-                <option value="drip">💧 Drip / Micro-Irrigation (90% Eff.)</option>
-                <option value="sprinkler">🌧️ Center Pivot / Sprinkler (75% Eff.)</option>
-                <option value="furrow_flood">🌊 Furrow / Flood (55% Eff.)</option>
+                {irrigationMethods.map((m) => {
+                  const mInfo = getIrrigationMethodInfo(m, t);
+                  return (
+                    <option key={m} value={m}>
+                      {mInfo.title}
+                    </option>
+                  );
+                })}
               </select>
               <p className="mt-1 text-[11px] text-slate-500">
-                {IRRIGATION_EFFICIENCIES[irrigationMethod].description}
+                {getIrrigationMethodInfo(irrigationMethod, t).description}
               </p>
             </div>
 
             <div>
               <label htmlFor="farm-soil-type" className="block text-xs font-semibold text-slate-700 mb-1">
-                Soil Texture Type
+                {t.soilTypeLabel}
               </label>
               <select
                 id="farm-soil-type"
@@ -260,13 +282,17 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
                 onChange={(e) => setSoilType(e.target.value as SoilType)}
                 className="w-full px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 cursor-pointer"
               >
-                <option value="sandy_loam">Sandy Loam (Light, rapid infiltration)</option>
-                <option value="loam">Loam (Medium balanced water capacity)</option>
-                <option value="clay_loam">Clay Loam (Heavy, high water retention)</option>
-                <option value="silt_clay">Silty Clay (Dense Aral Basin alluvium)</option>
+                {soilTypes.map((s) => {
+                  const sInfo = getSoilTypeInfo(s, t);
+                  return (
+                    <option key={s} value={s}>
+                      {sInfo.title}
+                    </option>
+                  );
+                })}
               </select>
               <p className="mt-1 text-[11px] text-slate-500">
-                Available water capacity: {SOIL_CHARACTERISTICS[soilType].availableWaterCapacityMmPerM} mm/meter
+                {t.waterCapacityLabel} {SOIL_CHARACTERISTICS[soilType].availableWaterCapacityMmPerM} mm/m
               </p>
             </div>
           </div>
@@ -278,13 +304,13 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
             >
-              Cancel
+              {t.cancelBtn}
             </button>
             <button
               type="submit"
               className="px-5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl active:scale-98 transition-all shadow-xs"
             >
-              Save Farm Settings
+              {t.saveFarmBtn}
             </button>
           </div>
         </form>

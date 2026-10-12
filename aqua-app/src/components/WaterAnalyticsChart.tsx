@@ -2,18 +2,12 @@
 
 import React, { useState } from 'react';
 import {
-  TrendingUp,
   BarChart3,
-  Droplets,
-  Layers,
-  ArrowUpRight,
   Info,
-  Calendar,
   Zap,
-  Fuel,
-  Leaf,
 } from 'lucide-react';
 import { FarmProfile, IrrigationRecommendation } from '@/lib/types';
+import { useTranslation, formatLocalizedDate, getIrrigationMethodInfo } from '@/lib/i18n';
 
 interface WaterAnalyticsChartProps {
   recommendation: IrrigationRecommendation;
@@ -24,6 +18,7 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
   recommendation,
   farm,
 }) => {
+  const { t, language } = useTranslation();
   const [activeMetric, setActiveMetric] = useState<'volume' | 'depth'>('volume');
 
   const schedule = recommendation.schedule;
@@ -39,10 +34,10 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
             <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
               <BarChart3 className="w-4 h-4" />
             </div>
-            <h3 className="text-base font-bold text-slate-900">Comparative Water Analytics</h3>
+            <h3 className="text-base font-bold text-slate-900">{t.analyticsTitle}</h3>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            AquaAI Precision Irrigation vs Regional Traditional Flood Inundation Baseline (50% Eff.)
+            {t.analyticsSubtitle}
           </p>
         </div>
 
@@ -56,7 +51,7 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Volume (m³)
+            {t.metricVolume}
           </button>
           <button
             onClick={() => setActiveMetric('depth')}
@@ -66,7 +61,7 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Depth (mm)
+            {t.metricDepth}
           </button>
         </div>
       </div>
@@ -75,40 +70,40 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
           <span className="text-[11px] font-semibold text-slate-500 uppercase">
-            Baseline Consumption
+            {t.baselineConsumption}
           </span>
           <div className="mt-1 text-2xl font-bold text-slate-700">
             {recommendation.baselineTotalVolumeM3.toLocaleString()}{' '}
             <span className="text-xs font-normal text-slate-400">m³</span>
           </div>
           <div className="text-[11px] text-slate-500 mt-1">
-            Historical 50% flood benchmark
+            {t.baselineBenchmark}
           </div>
         </div>
 
         <div className="p-4 rounded-xl bg-sky-50/60 border border-sky-200/70">
           <span className="text-[11px] font-semibold text-sky-800 uppercase">
-            AquaAI Prescribed Volume
+            {t.aquaAiPrescribed}
           </span>
           <div className="mt-1 text-2xl font-bold text-sky-900">
             {recommendation.totalVolumeM3.toLocaleString()}{' '}
             <span className="text-xs font-normal text-sky-600">m³</span>
           </div>
           <div className="text-[11px] text-sky-700 mt-1">
-            {farm.irrigationMethod.toUpperCase()} (1 mm/ha = 10 m³)
+            {getIrrigationMethodInfo(farm.irrigationMethod, t).title}
           </div>
         </div>
 
         <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200/70">
           <span className="text-[11px] font-semibold text-emerald-800 uppercase">
-            Projected Water Savings
+            {t.projectedWaterSavings}
           </span>
           <div className="mt-1 text-2xl font-bold text-emerald-700">
             {recommendation.potentialTotalSavingsM3.toLocaleString()}{' '}
             <span className="text-xs font-normal text-emerald-600">m³</span>
           </div>
           <div className="text-[11px] text-emerald-700 font-semibold mt-1">
-            ↓ {recommendation.potentialSavingsPercentage}% conserved vs flood
+            ↓ {recommendation.potentialSavingsPercentage}% {t.conservedVsFlood}
           </div>
         </div>
       </div>
@@ -117,35 +112,33 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
       <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
         <div className="flex items-center justify-between mb-4 text-xs text-slate-500">
           <span className="font-semibold text-slate-700">
-            {activeMetric === 'volume'
-              ? 'Daily Water Volume: AquaAI Delivery vs Baseline (m³)'
-              : 'Daily Hydrological Depth: ETc vs Precipitation vs Delivery (mm)'}
+            {activeMetric === 'volume' ? t.chartTitleVolume : t.chartTitleDepth}
           </span>
           <div className="flex items-center gap-4">
             {activeMetric === 'volume' ? (
               <>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded bg-slate-300" />
-                  <span>Baseline Flood</span>
+                  <span>{t.legendBaseline}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded bg-sky-500" />
-                  <span>AquaAI Plan</span>
+                  <span>{t.legendAquaAi}</span>
                 </div>
               </>
             ) : (
               <>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded bg-amber-500" />
-                  <span>Crop ETc</span>
+                  <span>{t.legendCropEtc}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded bg-blue-400" />
-                  <span>Rainfall</span>
+                  <span>{t.legendRain}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded bg-teal-500" />
-                  <span>Gross Needed</span>
+                  <span>{t.legendGross}</span>
                 </div>
               </>
             )}
@@ -162,24 +155,26 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
             const rainHeight = maxDepth > 0 ? (day.precipitationMm / maxDepth) * 100 : 0;
             const grossHeight = maxDepth > 0 ? (day.grossIrrigationMm / maxDepth) * 100 : 0;
 
+            const localizedDate = formatLocalizedDate(day.date, language);
+
             return (
               <div key={day.date} className="h-full flex flex-col justify-end items-center group relative">
                 {/* Tooltip on Hover */}
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full mb-2 bg-slate-900 text-white text-[10px] rounded-lg p-2 pointer-events-none z-20 whitespace-nowrap shadow-lg">
-                  <div className="font-bold text-sky-300">{day.dayLabel}</div>
+                  <div className="font-bold text-sky-300">{localizedDate}</div>
                   {activeMetric === 'volume' ? (
                     <>
-                      <div>AquaAI Plan: {day.waterVolumeM3.toLocaleString()} m³</div>
-                      <div>Baseline: {day.baselineVolumeM3.toLocaleString()} m³</div>
+                      <div>{t.legendAquaAi}: {day.waterVolumeM3.toLocaleString()} m³</div>
+                      <div>{t.legendBaseline}: {day.baselineVolumeM3.toLocaleString()} m³</div>
                       <div className="text-emerald-400 font-semibold">
-                        Savings: {day.potentialSavingsM3.toLocaleString()} m³
+                        {t.projectedWaterSavings}: {day.potentialSavingsM3.toLocaleString()} m³
                       </div>
                     </>
                   ) : (
                     <>
-                      <div>Crop ETc: {day.etcMm} mm</div>
-                      <div>Precipitation: {day.precipitationMm} mm</div>
-                      <div>Gross Delivery: {day.grossIrrigationMm} mm</div>
+                      <div>{t.legendCropEtc}: {day.etcMm} mm</div>
+                      <div>{t.legendRain}: {day.precipitationMm} mm</div>
+                      <div>{t.legendGross}: {day.grossIrrigationMm} mm</div>
                     </>
                   )}
                 </div>
@@ -220,7 +215,7 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
 
                 {/* Day label */}
                 <div className="mt-2 text-[10px] font-semibold text-slate-600 truncate max-w-full">
-                  {day.dayLabel.split(',')[0]}
+                  {localizedDate.split(',')[0]}
                 </div>
               </div>
             );
@@ -233,42 +228,52 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
             <Zap className="w-3.5 h-3.5 text-amber-500" />
-            Энергетическая и экологическая эффективность (ROI насосов)
+            {language === 'kk' ? 'Энергетикалық және экологиялық тиімділік (Сорғы ROI)' : language === 'ru' ? 'Энергетическая и экологическая эффективность (ROI насосов)' : 'Energy & Fuel Savings (Pump ROI)'}
           </span>
-          <span className="text-[11px] text-slate-500">За счёт снижения перекачки влаги</span>
+          <span className="text-[11px] text-slate-500">
+            {language === 'kk' ? 'Су айдау көлемін азайту есебінен' : language === 'ru' ? 'За счёт снижения перекачки влаги' : 'From pumping volume reduction'}
+          </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
-            <div className="text-[11px] text-slate-500 font-medium">Электроэнергия:</div>
+            <div className="text-[11px] text-slate-500 font-medium">
+              {language === 'kk' ? 'Электр энергиясы:' : language === 'ru' ? 'Электроэнергия:' : 'Electricity:'}
+            </div>
             <div className="mt-1 text-lg font-extrabold text-amber-700">
               {Math.round(recommendation.potentialTotalSavingsM3 * 0.35).toLocaleString()} <span className="text-xs font-normal text-slate-500">кВт⋅ч</span>
             </div>
-            <div className="text-[10px] text-slate-400 mt-0.5">0.35 кВт⋅ч на 1 м³</div>
+            <div className="text-[10px] text-slate-400 mt-0.5">0.35 kWh / 1 m³</div>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
-            <div className="text-[11px] text-slate-500 font-medium">Дизельное топливо:</div>
-            <div className="mt-1 text-lg font-extrabold text-sky-800">
-              {Math.round(recommendation.potentialTotalSavingsM3 * 0.08).toLocaleString()} <span className="text-xs font-normal text-slate-500">литров</span>
+            <div className="text-[11px] text-slate-500 font-medium">
+              {language === 'kk' ? 'Дизель отыны:' : language === 'ru' ? 'Дизельное топливо:' : 'Diesel fuel:'}
             </div>
-            <div className="text-[10px] text-slate-400 mt-0.5">Для ДВС-мотопомп</div>
+            <div className="mt-1 text-lg font-extrabold text-sky-800">
+              {Math.round(recommendation.potentialTotalSavingsM3 * 0.08).toLocaleString()} <span className="text-xs font-normal text-slate-500">L</span>
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">0.08 L / 1 m³</div>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
-            <div className="text-[11px] text-slate-500 font-medium">Экономия на ГСМ:</div>
+            <div className="text-[11px] text-slate-500 font-medium">
+              {language === 'kk' ? 'ЖЖМ үнемдеу:' : language === 'ru' ? 'Экономия на ГСМ:' : 'Fuel costs saved:'}
+            </div>
             <div className="mt-1 text-lg font-extrabold text-emerald-700">
               ₸ {Math.round(recommendation.potentialTotalSavingsM3 * 0.08 * 350).toLocaleString()}
             </div>
-            <div className="text-[10px] text-slate-400 mt-0.5">по 350 ₸ / литр ДТ</div>
+            <div className="text-[10px] text-slate-400 mt-0.5">@ 350 ₸ / L</div>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
-            <div className="text-[11px] text-slate-500 font-medium">Сокращение выбросов:</div>
-            <div className="mt-1 text-lg font-extrabold text-teal-800">
-              {(Math.round(recommendation.potentialTotalSavingsM3 * 0.35 * 0.62) / 1000).toFixed(2)} <span className="text-xs font-normal text-slate-500">т CO₂</span>
+            <div className="text-[11px] text-slate-500 font-medium">
+              {language === 'kk' ? 'CO₂ азайту:' : language === 'ru' ? 'Сокращение CO₂:' : 'Carbon offset:'}
             </div>
-            <div className="text-[10px] text-emerald-600 font-medium mt-0.5">ESG / Углеродный след</div>
+            <div className="mt-1 text-lg font-extrabold text-teal-800">
+              {(Math.round(recommendation.potentialTotalSavingsM3 * 0.35 * 0.62) / 1000).toFixed(2)} <span className="text-xs font-normal text-slate-500">t CO₂</span>
+            </div>
+            <div className="text-[10px] text-emerald-600 font-medium mt-0.5">ESG / Carbon</div>
           </div>
         </div>
       </div>
@@ -277,10 +282,14 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
       <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 space-y-1">
         <div className="font-semibold text-slate-800 flex items-center gap-1.5">
           <Info className="w-3.5 h-3.5 text-sky-600" />
-          Transparency &amp; Model Benchmark
+          <span>{language === 'kk' ? 'Гидрологиялық ашықтық және эталон' : language === 'ru' ? 'Прозрачность расчётов и базовый эталон' : 'Hydrological Transparency & Baseline'}</span>
         </div>
         <p className="leading-relaxed">
-          Savings calculations are modeled against an explicit benchmark: traditional unlined furrow flooding in Central Asia with 50% application efficiency. Potential savings reflect avoiding excessive runoff and over-irrigation. They do not constitute certified past carbon or water credits.
+          {language === 'kk'
+            ? 'Су үнемдеу есебі Орталық Азиядағы 50% ПӘК бар дәстүрлі топырақ арықпен суаруға қарсы есептелген. Ысырап пен шамадан тыс суаруды болдырмау нәтижесінде қол жеткізіледі.'
+            : language === 'ru'
+            ? 'Расчёт экономии смоделирован против регионального базового уровня традиционного арычного полива с КПД 50%. Экономия достигается за счёт предотвращения избыточного фильтрационного сброса.'
+            : 'Savings are modeled against regional unlined furrow flood baselines at 50% application efficiency. Potential savings reflect elimination of deep percolation losses.'}
         </p>
       </div>
     </div>

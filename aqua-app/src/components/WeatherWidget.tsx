@@ -9,10 +9,10 @@ import {
   CloudLightning,
   Wind,
   Droplets,
-  Calendar,
   Compass,
 } from 'lucide-react';
 import { DailyWeatherForecast } from '@/lib/types';
+import { useTranslation, getLocalizedDayName } from '@/lib/i18n';
 
 interface WeatherWidgetProps {
   forecast: DailyWeatherForecast[];
@@ -25,6 +25,8 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
   source,
   locationName,
 }) => {
+  const { t, language } = useTranslation();
+
   if (!forecast || forecast.length === 0) return null;
 
   const currentDay = forecast[0];
@@ -38,6 +40,26 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
     return <CloudSun className={`${className} text-sky-500`} />;
   };
 
+  const getLocalizedCondition = (condition: string, code: number) => {
+    if (language === 'kk') {
+      if (code === 0) return 'Ашық күн';
+      if (code <= 3) return 'Аздаған бұлтты';
+      if (code >= 51 && code <= 55) return 'Сіркіреген жаңбыр';
+      if (code >= 61 && code <= 82) return 'Жаңбырлы';
+      if (code >= 95) return 'Найзағайлы';
+      return condition;
+    }
+    if (language === 'ru') {
+      if (code === 0) return 'Ясно';
+      if (code <= 3) return 'Переменная облачность';
+      if (code >= 51 && code <= 55) return 'Моросящий дождь';
+      if (code >= 61 && code <= 82) return 'Дождь';
+      if (code >= 95) return 'Гроза';
+      return condition;
+    }
+    return condition;
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">
       {/* Header bar */}
@@ -47,8 +69,8 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
             <CloudSun className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Numerical Weather & ET₀ Forecast</h3>
-            <p className="text-[11px] text-slate-500">7-day high resolution atmospheric prediction</p>
+            <h3 className="text-sm font-bold text-slate-900">{t.weatherTitle}</h3>
+            <p className="text-[11px] text-slate-500">{t.weatherSubtitle}</p>
           </div>
         </div>
 
@@ -60,7 +82,7 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
                 : 'bg-amber-50 text-amber-700 border-amber-200'
             }`}
           >
-            {source === 'live' ? '● Open-Meteo Live API' : '● Climatology Fallback'}
+            {source === 'live' ? t.liveApiBadge : t.fallbackBadge}
           </span>
           <span className="text-xs text-slate-500 hidden sm:inline">{locationName}</span>
         </div>
@@ -71,54 +93,56 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
           <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
             <Sun className="w-3.5 h-3.5 text-amber-500" />
-            <span>Today&apos;s Max Temp</span>
+            <span>{t.todayMaxTemp}</span>
           </div>
           <div className="mt-1 text-2xl font-bold text-slate-900">
             {currentDay.tempMaxC}°<span className="text-xs font-normal text-slate-500">C</span>
           </div>
-          <div className="text-[11px] text-slate-500 mt-0.5">Min: {currentDay.tempMinC}°C</div>
+          <div className="text-[11px] text-slate-500 mt-0.5">{t.minTemp} {currentDay.tempMinC}°C</div>
         </div>
 
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
           <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
             <Droplets className="w-3.5 h-3.5 text-sky-500" />
-            <span>Precipitation</span>
+            <span>{t.precipitation}</span>
           </div>
           <div className="mt-1 text-2xl font-bold text-sky-700">
             {currentDay.precipitationMm} <span className="text-xs font-normal text-slate-500">mm</span>
           </div>
-          <div className="text-[11px] text-slate-500 mt-0.5">{currentDay.conditionLabel}</div>
+          <div className="text-[11px] text-slate-500 mt-0.5">
+            {getLocalizedCondition(currentDay.conditionLabel, currentDay.weatherCode)}
+          </div>
         </div>
 
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
           <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
             <Compass className="w-3.5 h-3.5 text-teal-600" />
-            <span>Reference ET₀</span>
+            <span>{t.referenceEt0}</span>
           </div>
           <div className="mt-1 text-2xl font-bold text-teal-700">
             {currentDay.et0Mm} <span className="text-xs font-normal text-slate-500">mm/day</span>
           </div>
-          <div className="text-[11px] text-teal-600 mt-0.5">FAO-56 Grass Baseline</div>
+          <div className="text-[11px] text-teal-600 mt-0.5">{t.et0GrassBaseline}</div>
         </div>
 
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
           <div className="flex items-center gap-1.5 text-slate-500 text-[11px] font-medium">
             <Wind className="w-3.5 h-3.5 text-slate-500" />
-            <span>Peak Wind & Hum</span>
+            <span>{t.peakWindHum}</span>
           </div>
           <div className="mt-1 text-2xl font-bold text-slate-800">
             {currentDay.windSpeedKmh} <span className="text-xs font-normal text-slate-500">km/h</span>
           </div>
-          <div className="text-[11px] text-slate-500 mt-0.5">Humidity: {currentDay.relativeHumidityPercent}%</div>
+          <div className="text-[11px] text-slate-500 mt-0.5">{t.humidity} {currentDay.relativeHumidityPercent}%</div>
         </div>
       </div>
 
       {/* 7-Day Forecast Micro Cards */}
       <div className="mt-2 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
         {forecast.map((day, idx) => {
+          const dayName = getLocalizedDayName(day.date, language, idx === 0);
           const dateObj = new Date(day.date);
-          const dayName = idx === 0 ? 'Today' : dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-          const dateLabel = dateObj.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+          const dateLabel = `${dateObj.getDate()}.${dateObj.getMonth() + 1}`;
 
           return (
             <div

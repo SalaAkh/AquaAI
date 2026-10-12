@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { FarmProfile, IrrigationRecommendation } from '@/lib/types';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, getCropLabel } from '@/lib/i18n';
 import {
   Award,
   Coins,
@@ -13,7 +13,6 @@ import {
   Sparkles,
   ExternalLink,
   Droplets,
-  Calendar,
 } from 'lucide-react';
 
 interface WaterSubsidiesCardProps {
@@ -66,7 +65,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-semibold text-xs shadow-md transition-all active:scale-[0.98]"
         >
           <Award className="w-4 h-4 text-emerald-200" />
-          <span>{showCertificate ? 'Скрыть сертификат' : t.exportCertBtn}</span>
+          <span>{showCertificate ? t.hideCertBtn : t.exportCertBtn}</span>
         </button>
       </div>
 
@@ -82,21 +81,21 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
             ₸ {sevenDaySavingsKzt.toLocaleString()}
           </div>
           <p className="text-xs text-emerald-700/80 mt-1.5">
-            За 7 дней учёта ({sevenDaySavedM3.toLocaleString()} м³ сэкономленной влаги)
+            {t.sevenDaysAudit} ({sevenDaySavedM3.toLocaleString()} m³)
           </p>
         </div>
 
         {/* Metric 2: Seasonal Projected KZT */}
         <div className="bg-gradient-to-br from-sky-50/70 to-indigo-50/40 rounded-2xl p-5 border border-sky-100">
           <div className="flex items-center justify-between text-xs font-semibold text-sky-800 mb-2">
-            <span>Сезонный потенциал (100 дней):</span>
+            <span>{t.seasonalPotential}</span>
             <Sparkles className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-sky-950">
             ₸ {seasonSavingsKzt.toLocaleString()}
           </div>
           <p className="text-xs text-sky-700/80 mt-1.5">
-            Прогнозная экономия ~{seasonSavedM3.toLocaleString()} м³ за сезон полива
+            {t.seasonProjectedM3} ~{seasonSavedM3.toLocaleString()} m³
           </p>
         </div>
 
@@ -110,7 +109,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
             {waterCredits} <span className="text-base font-semibold text-purple-700">AWC</span>
           </div>
           <p className="text-xs text-purple-700/80 mt-1.5">
-            AquaAI Water Credits (1 кредит = 100 м³ верифицированной воды)
+            {t.creditsUnitDesc}
           </p>
         </div>
       </div>
@@ -128,7 +127,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Распечатать / PDF</span>
+              <span>{t.certPrintBtn}</span>
             </button>
           </div>
 
@@ -149,7 +148,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
 
               <div>
                 <p className="text-xs font-bold tracking-widest text-amber-700 uppercase">
-                  Республика Казахстан • Бассейновая инспекция
+                  {t.certMinistry}
                 </p>
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1 uppercase tracking-tight">
                   {t.certTitle}
@@ -161,31 +160,29 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
 
               {/* Awarded To */}
               <div className="max-w-xl mx-auto py-2 border-y border-amber-200/80 text-sm">
-                <p className="text-slate-500 text-xs">Настоящим удостоверяется, что агрохозяйство:</p>
+                <p className="text-slate-500 text-xs">{t.certCertifies}</p>
                 <p className="text-xl font-bold text-slate-900 mt-0.5">{farm.name}</p>
                 <p className="text-xs text-slate-600 mt-1">
-                  Регион: <span className="font-semibold">{farm.region}</span> • Площадь:{' '}
-                  <span className="font-semibold">{farm.fieldSizeHectares} га</span> • Культура:{' '}
-                  <span className="font-semibold capitalize">{farm.cropType}</span>
+                  {farm.region} • {farm.fieldSizeHectares} {t.hectares} • {getCropLabel(farm.cropType, t)}
                 </p>
               </div>
 
               {/* Verified Metrics */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto text-left text-xs bg-white/80 p-4 rounded-xl border border-amber-200/60 shadow-xs">
                 <div>
-                  <span className="text-slate-400 block">Период аудита:</span>
+                  <span className="text-slate-400 block">{t.certAuditPeriod}</span>
                   <span className="font-bold text-slate-800">{recommendation.periodStart} — {recommendation.periodEnd}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Сэкономлено воды:</span>
-                  <span className="font-bold text-emerald-700 text-sm">{sevenDaySavedM3.toLocaleString()} м³</span>
+                  <span className="text-slate-400 block">{t.certWaterSaved}</span>
+                  <span className="font-bold text-emerald-700 text-sm">{sevenDaySavedM3.toLocaleString()} m³</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Снижение расхода:</span>
+                  <span className="text-slate-400 block">{t.certConsumptionDrop}</span>
                   <span className="font-bold text-sky-700 text-sm">-{recommendation.potentialSavingsPercentage}%</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Эко-субсидия:</span>
+                  <span className="text-slate-400 block">{t.certEcoSubsidy}</span>
                   <span className="font-bold text-emerald-900 text-sm">₸ {sevenDaySavingsKzt.toLocaleString()}</span>
                 </div>
               </div>
@@ -195,7 +192,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-1 text-slate-700 font-semibold">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Криптографический хеш директивы:</span>
+                    <span>{t.certDirectiveHash}</span>
                   </div>
                   <code className="block font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-700 break-all max-w-md">
                     {recommendation.onChainProof?.dataHash || `sha256-directive-${recommendation.id.slice(0, 16)}`}
@@ -218,9 +215,9 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
                 </div>
 
                 <div className="text-right">
-                  <div className="font-semibold text-slate-800">AquaAI Agronomic Engine</div>
+                  <div className="font-semibold text-slate-800">{t.certEngine}</div>
                   <div className="text-[10px] text-slate-400">FAO-56 Penman-Monteith Verification</div>
-                  <div className="text-[10px] text-emerald-600 font-medium">Статус: ВЕРИФИЦИРОВАНО ●</div>
+                  <div className="text-[10px] text-emerald-600 font-medium">{t.certStatus}</div>
                 </div>
               </div>
             </div>

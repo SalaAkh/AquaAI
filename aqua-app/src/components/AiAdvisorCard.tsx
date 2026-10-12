@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
   Bot,
@@ -14,7 +14,7 @@ import {
   User,
 } from 'lucide-react';
 import { FarmProfile, IrrigationRecommendation } from '@/lib/types';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, getLocalizedWindow } from '@/lib/i18n';
 
 interface AiAdvisorCardProps {
   recommendation: IrrigationRecommendation;
@@ -33,30 +33,79 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
   farm,
   onUpdateExplanation,
 }) => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const [chatOpen, setChatOpen] = useState(true);
   const [inputQuery, setInputQuery] = useState('');
   const [isSending, setIsSending] = useState(false);
+
+  const getLocalizedWelcome = () => {
+    const fName = farm?.name || recommendation.farmName;
+    if (language === 'kk') {
+      return `Сәлеметсіз бе! Мен AquaAI гидролог-агрономымын. «${fName}» алқабын суару, булануды азайту және су минерализациясы бойынша кез келген сұраққа жауап беруге дайынмын.`;
+    }
+    if (language === 'ru') {
+      return `Здравствуйте! Я агроном-гидролог AquaAI. Готов ответить на любые вопросы по поливу поля «${fName}», защите от испарения или минерализации воды.`;
+    }
+    return `Hello! I am your AquaAI hydrological agronomist. Ready to answer questions on irrigation for "${fName}", evaporative protection, or soil salinity.`;
+  };
+
+  const getLocalizedDefaultExplanation = () => {
+    const fName = farm?.name || recommendation.farmName;
+    const windowText = getLocalizedWindow(recommendation.recommendedWindowSummary, language);
+
+    if (language === 'kk') {
+      return {
+        summary: `«${fName}» алқабына алдағы ${recommendation.forecastDays} күнде шамамен ${recommendation.totalGrossIrrigationMm} мм (${recommendation.totalVolumeM3.toLocaleString()} м³) суару қажет. Жауын-шашын болжамы (${recommendation.totalPrecipitationMm} мм) дақылдың су тапшылығын өтеуге жеткіліксіз.`,
+        farmerAdvice: `Жел ығысуы мен булануды азайту үшін суаруды таңғы уақытқа (${windowText}) жоспарлаңыз.`,
+        conservationImpact: `Бұл кестені сақтау дәстүрлі бастырумен салыстырғанда шамамен ${recommendation.potentialTotalSavingsM3.toLocaleString()} м³ (${recommendation.potentialSavingsPercentage}%) суды үнемдейді.`,
+        modelConfidence: 'high' as const,
+        source: 'algorithmic_fallback' as const,
+      };
+    }
+    if (language === 'ru') {
+      return {
+        summary: `Хозяйству «${fName}» требуется ориентировочно ${recommendation.totalGrossIrrigationMm} мм (${recommendation.totalVolumeM3.toLocaleString()} м³) полива на ближайшие ${recommendation.forecastDays} дней. Прогноз осадков (${recommendation.totalPrecipitationMm} мм) недостаточен для покрытия водного дефицита культуры.`,
+        farmerAdvice: `Распределите полив на ранние утренние часы (${windowText}), чтобы минимизировать ветровой снос и пиковое испарение.`,
+        conservationImpact: `Соблюдение данного графика экономит ориентировочно ${recommendation.potentialTotalSavingsM3.toLocaleString()} м³ (${recommendation.potentialSavingsPercentage}%) по сравнению с традиционным затоплением.`,
+        modelConfidence: 'high' as const,
+        source: 'algorithmic_fallback' as const,
+      };
+    }
+    return {
+      summary: `Field "${fName}" requires approximately ${recommendation.totalGrossIrrigationMm} mm (${recommendation.totalVolumeM3.toLocaleString()} m³) of irrigation across the next ${recommendation.forecastDays} days. Forecast rainfall (${recommendation.totalPrecipitationMm} mm) does not meet crop demand.`,
+      farmerAdvice: `Apply scheduled water during the recommended window (${windowText}) to minimize wind drift and thermal evaporative flash.`,
+      conservationImpact: `Adhering to this schedule conserves approximately ${recommendation.potentialTotalSavingsM3.toLocaleString()} m³ (${recommendation.potentialSavingsPercentage}%) compared to regional 50% efficiency flood baselines.`,
+      modelConfidence: 'high' as const,
+      source: 'algorithmic_fallback' as const,
+    };
+  };
+
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       role: 'model',
-      text: `Здравствуйте! Я агроном-гидролог AquaAI. Готов ответить на любые вопросы по поливу поля «${farm?.name || recommendation.farmName}», защите от испарения или минерализации воды.`,
-      time: 'Сейчас',
+      text: getLocalizedWelcome(),
+      time: t.nowTime,
     },
   ]);
 
   const [explanation, setExplanation] = useState(
-    recommendation.aiExplanation || {
-      summary: `Хозяйству ${recommendation.farmName} требуется ориентировочно ${recommendation.totalGrossIrrigationMm} мм (${recommendation.totalVolumeM3.toLocaleString()} м³) полива на ближайшие ${recommendation.forecastDays} дней. Прогноз осадков (${recommendation.totalPrecipitationMm} мм) недостаточен для покрытия водного дефицита культуры.`,
-      farmerAdvice: `Распределите полив на ранние утренние часы (${recommendation.recommendedWindowSummary}), чтобы минимизировать ветровой снос и пиковое испарение.`,
-      conservationImpact: `Соблюдение данного графика экономит ориентировочно ${recommendation.potentialTotalSavingsM3.toLocaleString()} м³ (${recommendation.potentialSavingsPercentage}%) по сравнению с традиционным затоплением.`,
-      modelConfidence: 'high' as const,
-      source: 'algorithmic_fallback' as const,
-    }
+    recommendation.aiExplanation || getLocalizedDefaultExplanation()
   );
 
-  React.useEffect(() => {
+  // When language changes, update the initial message if only welcome message is present
+  useEffect(() => {
+    setChatMessages((prev) => {
+      if (prev.length === 1 && prev[0].role === 'model') {
+        return [{ role: 'model', text: getLocalizedWelcome(), time: t.nowTime }];
+      }
+      return prev;
+    });
+    if (!recommendation.aiExplanation) {
+      setExplanation(getLocalizedDefaultExplanation());
+    }
+  }, [language]);
+
+  useEffect(() => {
     if (recommendation.aiExplanation) {
       setExplanation(recommendation.aiExplanation);
     }
@@ -68,7 +117,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
       const res = await fetch('/api/ai/advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recommendation }),
+        body: JSON.stringify({ recommendation, language }),
       });
 
       if (res.ok) {
@@ -114,6 +163,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
           message: q,
           recommendation,
           farm,
+          language,
           history: chatMessages.slice(-4),
         }),
       });
@@ -136,7 +186,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
         ...prev,
         {
           role: 'model',
-          text: 'Рекомендуется придерживаться текущей нормы полива FAO-56. Для минимизации потерь включайте полив в утреннее время до 09:00.',
+          text: t.chatFallbackReply,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -146,10 +196,10 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
   };
 
   const quickPrompts = [
-    '💨 Полив при сильном ветре',
-    '🧂 Что делать при засолении почвы?',
-    '⏰ В какие часы лучше включать насос?',
-    '🧪 Как проводить фертигацию?',
+    t.quickPrompt1,
+    t.quickPrompt2,
+    t.quickPrompt3,
+    t.quickPrompt4,
   ];
 
   return (
@@ -168,7 +218,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Интерактивный научный консультант по поливу и защите почвы
+              {t.advisorSubtitle}
             </p>
           </div>
         </div>
@@ -180,7 +230,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs active:scale-95 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-sky-600 ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'Консультация...' : t.refreshAiBtn}</span>
+            <span>{loading ? t.recalculating : t.refreshAiBtn}</span>
           </button>
         </div>
       </div>
@@ -191,7 +241,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
           <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
             <Droplets className="w-3.5 h-3.5 text-sky-600" />
-            Ключевой вывод гидромодели
+            {t.calculatorTitle}
           </div>
           <p className="text-sm font-semibold text-slate-800 leading-relaxed">
             &ldquo;{explanation.summary}&rdquo;
@@ -226,9 +276,9 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-sky-600" />
-              Задать вопрос ИИ-агроному
+              {t.chatTabLabel}
             </h4>
-            <span className="text-[11px] text-slate-400">В режиме реального диалога</span>
+            <span className="text-[11px] text-slate-400">Gemini 2.0 Flash</span>
           </div>
 
           {/* Quick Prompts */}
@@ -284,7 +334,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
             {isSending && (
               <div className="flex gap-2 text-xs items-center text-slate-500 italic py-1">
                 <Bot className="w-3.5 h-3.5 text-sky-600 animate-spin" />
-                <span>Агроном готовит обоснованный ответ...</span>
+                <span>{language === 'kk' ? 'Агроном жауап дайындауда...' : language === 'ru' ? 'Агроном готовит обоснованный ответ...' : 'Agronomist is formulating response...'}</span>
               </div>
             )}
           </div>
@@ -304,10 +354,10 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
               name="aiAdvisorQuery"
               type="text"
               autoComplete="off"
-              aria-label="Вопрос агроному-гидрологу"
+              aria-label={t.chatInputPlaceholder}
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
-              placeholder="Спросите агронома (например: «Можно ли поливать завтра днем?»)..."
+              placeholder={t.chatInputPlaceholder}
               disabled={isSending}
               className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 placeholder:text-slate-400"
             />
@@ -319,7 +369,7 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-semibold text-xs shadow-2xs transition-all active:scale-95"
             >
               <Send className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Спросить</span>
+              <span className="hidden sm:inline">{t.sendBtn}</span>
             </button>
           </form>
         </div>
@@ -328,10 +378,10 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
         <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100">
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-            <span>Рекомендации строго верифицированы принципами гидрологии FAO-56.</span>
+            <span>FAO-56 Penman-Monteith • Open-Meteo • Gemini 2.0</span>
           </div>
           <span className="font-mono text-[10px] text-slate-400">
-            Достоверность: {explanation.modelConfidence.toUpperCase()} • Режим: {explanation.source}
+            {explanation.source}
           </span>
         </div>
       </div>

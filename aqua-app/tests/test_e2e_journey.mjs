@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { Connection } from '@solana/web3.js';
 
-const APP_URL = 'http://localhost:3000';
+const APP_URL = process.env.APP_URL || 'http://localhost:3001';
 const SOLANA_DEVNET_RPC = 'https://api.devnet.solana.com';
 
 async function runEndToEndVerification() {
@@ -14,7 +14,10 @@ async function runEndToEndVerification() {
   assert.equal(rootRes.status, 200, 'Root URL must return HTTP 200');
   const html = await rootRes.text();
   assert.ok(html.includes('AquaAI'), 'HTML must contain brand name AquaAI');
-  assert.ok(html.includes('Smarter Irrigation'), 'HTML must contain hero tag');
+  assert.ok(
+    html.includes('Smarter Irrigation') || html.includes('Точный полив') || html.includes('Дәл суару'),
+    'HTML must contain hero tag'
+  );
   console.log('✔ Step 1 Passed: Root Next.js page served successfully (Length: ' + html.length + ' bytes).\n');
 
   // STEP 2: Create a Farm Profile in Kazakhstan

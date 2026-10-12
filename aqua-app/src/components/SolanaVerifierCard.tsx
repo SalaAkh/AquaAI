@@ -13,9 +13,7 @@ import {
   Wallet,
   RefreshCw,
   AlertCircle,
-  Info,
 } from 'lucide-react';
-import { PublicKey } from '@solana/web3.js';
 import { IrrigationRecommendation, OnChainProof } from '@/lib/types';
 import {
   commitProofToSolana,
@@ -24,6 +22,7 @@ import {
   SOLANA_DEVNET_RPC,
 } from '@/lib/solana';
 import { useSolanaWallet } from '@/lib/wallet';
+import { useTranslation } from '@/lib/i18n';
 
 interface SolanaVerifierCardProps {
   recommendation: IrrigationRecommendation;
@@ -34,6 +33,7 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
   recommendation,
   onProofCreated,
 }) => {
+  const { t, language } = useTranslation();
   const [hash, setHash] = useState<string>('');
   const [isHashing, setIsHashing] = useState(false);
   const [proof, setProof] = useState<OnChainProof | null>(recommendation.onChainProof || null);
@@ -48,25 +48,6 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
     error?: string;
   }>({ tested: false });
   const [copied, setCopied] = useState(false);
-
-  // Browser Wallet State
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [isConnectingWallet, setIsConnectingWallet] = useState(false);
-  const [hasBrowserWallet, setHasBrowserWallet] = useState(false);
-
-  // Check if browser wallet (Phantom/Solflare) is injected
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const solana = (window as any).solana;
-      if (solana && solana.isPhantom) {
-        setHasBrowserWallet(true);
-        if (solana.isConnected && solana.publicKey) {
-          setWalletAddress(solana.publicKey.toString());
-        }
-      }
-    }
-  }, []);
 
   // Compute recommendation hash on load or change
   useEffect(() => {
@@ -175,13 +156,13 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-slate-900">Solana Devnet Verification</h3>
+              <h3 className="text-base font-bold text-slate-900">{t.solanaTitle}</h3>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                Solana Memo Program
+                {t.memoProgramBadge}
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Immutable cryptographic audit trail for agricultural water directives
+              {t.solanaSubtitle}
             </p>
           </div>
         </div>
@@ -203,7 +184,7 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50/80 hover:bg-purple-100 text-xs font-semibold text-purple-800 transition-colors shadow-2xs"
             >
               <Wallet className="w-3.5 h-3.5" />
-              <span>{wallet.isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
+              <span>{wallet.isConnecting ? t.connecting : t.connectWalletBtn}</span>
             </button>
           )}
         </div>
@@ -213,9 +194,9 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
       <div className="p-4 rounded-xl bg-purple-50/50 border border-purple-100 text-xs text-purple-950 flex items-start gap-3">
         <Lock className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
         <div>
-          <div className="font-semibold text-purple-900 mb-0.5">Off-Chain Data Integrity Architecture</div>
+          <div className="font-semibold text-purple-900 mb-0.5">{t.offchainTitle}</div>
           <p className="text-purple-800/90 leading-relaxed">
-            Sensitive farm identifiers, field GPS coordinates, and farmer personal identity remain strictly off-chain. Only a SHA-256 cryptographic digest of the agronomic model result is committed to the Solana blockchain via the native Memo Program.
+            {t.offchainDesc}
           </p>
         </div>
       </div>
@@ -224,21 +205,21 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
       <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-slate-500 uppercase">
-            SHA-256 Recommendation Fingerprint
+            {t.fingerprintLabel}
           </span>
           <button
             onClick={() => copyToClipboard(hash)}
             className="inline-flex items-center gap-1 text-[11px] text-slate-600 hover:text-slate-900 transition-colors"
           >
             {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-            <span>{copied ? 'Copied' : 'Copy Hash'}</span>
+            <span>{copied ? t.copied : t.copyHashBtn}</span>
           </button>
         </div>
         <div className="font-mono text-xs text-slate-800 break-all bg-white p-2.5 rounded-lg border border-slate-200">
           {isHashing ? 'Computing cryptographic digest...' : hash || 'No hash generated'}
         </div>
         <div className="text-[11px] text-slate-500">
-          Canonical Payload: ID: {recommendation.id} • Period: {recommendation.periodStart} to {recommendation.periodEnd} • Gross: {recommendation.totalGrossIrrigationMm} mm • Volume: {recommendation.totalVolumeM3.toLocaleString()} m³.
+          {t.canonicalPayloadLabel} ID: {recommendation.id} • {recommendation.periodStart} ~ {recommendation.periodEnd} • Gross: {recommendation.totalGrossIrrigationMm} mm • Volume: {recommendation.totalVolumeM3.toLocaleString()} m³.
         </div>
       </div>
 
@@ -246,9 +227,9 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h4 className="text-sm font-bold text-slate-900">1. Commit Record to Solana Devnet</h4>
+            <h4 className="text-sm font-bold text-slate-900">{t.commitStepTitle}</h4>
             <p className="text-xs text-slate-500">
-              Signs and broadcasts a live transaction to the Solana Memo Program ({SOLANA_DEVNET_RPC}).
+              {t.commitStepDesc} ({SOLANA_DEVNET_RPC})
             </p>
           </div>
 
@@ -260,12 +241,12 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
             {isSubmitting ? (
               <>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Broadcasting to Devnet...</span>
+                <span>{t.recordingInProgress}</span>
               </>
             ) : (
               <>
                 <LinkIcon className="w-3.5 h-3.5" />
-                <span>{walletAddress ? 'Sign & Record via Wallet' : 'Record on Solana Devnet'}</span>
+                <span>{t.recordOnChainBtn}</span>
               </>
             )}
           </button>
@@ -285,12 +266,12 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
                 {proof.status === 'verified' ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Transaction Confirmed on Solana Devnet</span>
+                    <span>{t.verifiedStatus}</span>
                   </>
                 ) : (
                   <>
                     <XCircle className="w-4 h-4 text-rose-600" />
-                    <span>Submission Notice</span>
+                    <span>Notice</span>
                   </>
                 )}
               </div>
@@ -301,7 +282,7 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
 
             {proof.signature && (
               <div className="space-y-1">
-                <div className="text-[11px] font-semibold text-slate-600">Transaction Signature:</div>
+                <div className="text-[11px] font-semibold text-slate-600">Solana Transaction Signature:</div>
                 <div className="font-mono text-[11px] break-all bg-white/80 p-2 rounded border border-emerald-200">
                   {proof.signature}
                 </div>
@@ -313,7 +294,7 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-700 hover:text-purple-900 underline underline-offset-2"
                     >
-                      <span>View in Solana Explorer (Devnet)</span>
+                      <span>{t.viewExplorerBtn}</span>
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
@@ -324,9 +305,6 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
             {proof.error && (
               <div className="text-[11px] text-rose-700 pt-1 space-y-1">
                 <div><strong>Status Detail:</strong> {proof.error}</div>
-                <div className="text-slate-600">
-                  Tip: Connect a browser wallet (Phantom/Solflare) funded on Devnet, or fund with Devnet SOL from <code>faucet.solana.com</code>.
-                </div>
               </div>
             )}
           </div>
@@ -336,9 +314,9 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
       {/* Verify Existing Signature Section */}
       <div className="pt-4 border-t border-slate-100 space-y-3">
         <div>
-          <h4 className="text-sm font-bold text-slate-900">2. Verify On-Chain Integrity</h4>
+          <h4 className="text-sm font-bold text-slate-900">{t.verifyRpcStepTitle}</h4>
           <p className="text-xs text-slate-500">
-            Fetch transaction logs directly from Solana Devnet RPC to mathematically verify the memo matches the record.
+            {t.verifyRpcStepDesc}
           </p>
         </div>
 
@@ -356,10 +334,10 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
             name="solanaTxSignature"
             type="text"
             autoComplete="off"
-            aria-label="Solana transaction signature"
+            aria-label={t.txSignaturePlaceholder}
             value={verificationInput}
             onChange={(e) => setVerificationInput(e.target.value)}
-            placeholder="Paste Solana transaction signature..."
+            placeholder={t.txSignaturePlaceholder}
             className="flex-1 px-3.5 py-2 text-xs font-mono bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
           />
           <button
@@ -369,7 +347,7 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
             disabled={isVerifying || !verificationInput.trim()}
             className="px-4 py-2 text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 rounded-xl transition-colors disabled:opacity-50"
           >
-            {isVerifying ? 'Verifying RPC...' : 'Verify Signature'}
+            {isVerifying ? t.verifying : t.verifyNowBtn}
           </button>
         </form>
 
@@ -385,9 +363,9 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold">Cryptographic Match Verified!</div>
+                  <div className="font-bold">{t.hashVerifiedValid}</div>
                   <div className="text-[11px] text-emerald-800 mt-0.5">
-                    The Solana Devnet transaction memo matches the off-chain calculation fingerprint. Confirmed in slot: {verificationResult.slot ?? 'Latest'}.
+                    Solana Devnet Memo: Slot {verificationResult.slot ?? 'Latest'}.
                   </div>
                 </div>
               </div>
@@ -395,9 +373,9 @@ export const SolanaVerifierCard: React.FC<SolanaVerifierCardProps> = ({
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold">Verification Inconclusive or Not Found</div>
+                  <div className="font-bold">{t.hashVerificationFailed}</div>
                   <div className="text-[11px] text-amber-800 mt-0.5">
-                    {verificationResult.error || 'The transaction was not found on Solana Devnet or the memo does not match this record hash.'}
+                    {verificationResult.error || 'Transaction not found or hash mismatch.'}
                   </div>
                 </div>
               </div>
