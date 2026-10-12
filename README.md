@@ -9,7 +9,7 @@
   <a href="https://github.com/SalaAkh/AquaAI/actions/workflows/ci.yml">
     <img src="https://github.com/SalaAkh/AquaAI/actions/workflows/ci.yml/badge.svg" alt="CI Status" />
   </a>
-  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&root-directory=aqua-app">
+  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&project-name=aqua-ai&root-directory=aqua-app">
     <img src="https://img.shields.io/badge/Deploy%20with-Vercel-black?logo=vercel" alt="Deploy with Vercel" />
   </a>
   <a href="https://app.netlify.com/start/deploy?repository=https://github.com/SalaAkh/AquaAI">
@@ -39,7 +39,7 @@
 ## ⚡ Быстрые ссылки / Quick Links
 
 - 🌐 **[Онлайн Демо Сайт (Live Preview)](https://aqua-ai-demo.loca.lt)** *(Туннель запущен прямо сейчас)*
-- 🚀 **[Развернуть в 1 клик на Vercel (Production)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&root-directory=aqua-app)**
+- 🚀 **[Развернуть в 1 клик на Vercel (Production)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&project-name=aqua-ai&root-directory=aqua-app)**
 - 📁 **[Репозиторий GitHub](https://github.com/SalaAkh/AquaAI)**
 - 📑 **[Архитектура и формулы](#-научный-агрономический-движок-fao-56)**
 
@@ -142,7 +142,7 @@ flowchart TD
 
 ### Вариант 1: Развертывание в 1 клик на Vercel (Самый быстрый и надежный способ)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&root-directory=aqua-app)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&project-name=aqua-ai&root-directory=aqua-app)
 
 1. Нажмите на кнопку выше.
 2. Войдите в свой аккаунт Vercel (через GitHub).
