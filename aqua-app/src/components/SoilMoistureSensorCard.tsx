@@ -106,15 +106,20 @@ export const SoilMoistureSensorCard: React.FC<SoilMoistureSensorCardProps> = ({ 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 text-xs font-semibold border border-indigo-200/80 mb-2">
-            <Radio className="w-3.5 h-3.5" />
-            <span>{t.loraTelemetryBadge}</span>
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-semibold border border-amber-200">
+              <Radio className="w-3.5 h-3.5 text-amber-600" />
+              <span>Sample Data • Simulated IoT Telemetry</span>
+            </div>
+            <span className="text-[11px] font-semibold text-slate-400">
+              Agronomic Benchmark Profile
+            </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             <span>{t.soilTelemetryTitle}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            {t.soilTelemetrySubtitle}
+            {t.soilTelemetrySubtitle} (Simulated probe readings calibrated for Central Asian soil types. Not presented as physical in-situ measurements).
           </p>
         </div>
 

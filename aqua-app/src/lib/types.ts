@@ -29,6 +29,7 @@ export interface FarmProfile {
   cropType: CropType;
   growthStage: GrowthStage;
   irrigationMethod: IrrigationMethod;
+  customEfficiency?: number;
   soilType: SoilType;
   isDemo?: boolean;
   createdAt: string;

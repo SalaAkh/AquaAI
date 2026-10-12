@@ -12,18 +12,30 @@ import {
   Wallet,
   LogOut,
   ChevronDown,
+  Sprout,
+  Sparkles,
 } from 'lucide-react';
 import { FarmProfile } from '@/lib/types';
 import { useTranslation } from '@/lib/i18n';
 import { useSolanaWallet } from '@/lib/wallet';
+
+export type NavTabType =
+  | 'dashboard'
+  | 'farms'
+  | 'advisor'
+  | 'analytics'
+  | 'satellite'
+  | 'blockchain'
+  | 'subsidies'
+  | 'about';
 
 interface NavbarProps {
   currentFarm: FarmProfile;
   farms: FarmProfile[];
   onSelectFarm: (farm: FarmProfile) => void;
   onOpenNewFarmModal: () => void;
-  activeTab: 'dashboard' | 'analytics' | 'satellite' | 'blockchain' | 'subsidies' | 'about';
-  setActiveTab: (tab: 'dashboard' | 'analytics' | 'satellite' | 'blockchain' | 'subsidies' | 'about') => void;
+  activeTab: NavTabType;
+  setActiveTab: (tab: NavTabType) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -47,8 +59,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: 'dashboard' as const, label: t.tabDashboard, icon: Droplets, color: 'text-sky-600' },
+    { id: 'farms' as const, label: t.tabFarms, icon: Sprout, color: 'text-emerald-600' },
+    { id: 'advisor' as const, label: t.tabAdvisor, icon: Sparkles, color: 'text-cyan-600' },
     { id: 'satellite' as const, label: t.tabSatellite, icon: Satellite, color: 'text-teal-600' },
-    { id: 'analytics' as const, label: t.tabAnalytics, icon: TrendingUp, color: 'text-emerald-600' },
+    { id: 'analytics' as const, label: t.tabAnalytics, icon: TrendingUp, color: 'text-indigo-600' },
     { id: 'subsidies' as const, label: t.tabSubsidies, icon: Award, color: 'text-amber-600' },
     { id: 'blockchain' as const, label: t.tabBlockchain, icon: ShieldCheck, color: 'text-purple-600' },
     { id: 'about' as const, label: t.tabAbout, icon: Globe, color: 'text-blue-600' },

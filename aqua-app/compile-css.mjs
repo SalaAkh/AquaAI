@@ -81,12 +81,14 @@ body {
 .text-gradient-water {
   background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-emerald {
   background: linear-gradient(135deg, #059669 0%, #10b981 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

@@ -280,16 +280,21 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
 
       {/* Assumptions & Integrity Note */}
       <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 space-y-1">
-        <div className="font-semibold text-slate-800 flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-sky-600" />
-          <span>{language === 'kk' ? 'Гидрологиялық ашықтық және эталон' : language === 'ru' ? 'Прозрачность расчётов и базовый эталон' : 'Hydrological Transparency & Baseline'}</span>
+        <div className="font-semibold text-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 text-sky-600" />
+            <span>{language === 'kk' ? 'Гидрологиялық ашықтық және эталон' : language === 'ru' ? 'Прозрачность расчётов и базовый эталон' : 'Hydrological Transparency & Baseline'}</span>
+          </div>
+          <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+            Model Projection • Not a physical meter result
+          </span>
         </div>
         <p className="leading-relaxed">
           {language === 'kk'
-            ? 'Су үнемдеу есебі Орталық Азиядағы 50% ПӘК бар дәстүрлі топырақ арықпен суаруға қарсы есептелген. Ысырап пен шамадан тыс суаруды болдырмау нәтижесінде қол жеткізіледі.'
+            ? 'Су үнемдеу есебі Орталық Азиядағы 50% ПӘК бар дәстүрлі топырақ арықпен суаруға қарсы есептелген. Бұл мән физикалық есептегіш көрсеткіші емес, математикалық модельдің болжамы.'
             : language === 'ru'
-            ? 'Расчёт экономии смоделирован против регионального базового уровня традиционного арычного полива с КПД 50%. Экономия достигается за счёт предотвращения избыточного фильтрационного сброса.'
-            : 'Savings are modeled against regional unlined furrow flood baselines at 50% application efficiency. Potential savings reflect elimination of deep percolation losses.'}
+            ? 'Расчёт экономии смоделирован против регионального базового уровня традиционного арычного полива с КПД 50%. Значение является расчётным показателем математической модели, а не замером физического расходомера.'
+            : 'Savings are modeled against regional unlined furrow flood baselines at 50% application efficiency. This figure represents an agronomic simulation projection, not a physical meter measurement.'}
         </p>
       </div>
     </div>

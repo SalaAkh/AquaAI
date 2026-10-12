@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AquaAI — Founder Pitch Teleprompter (Colosseum Hackathon)</title>
+<style>
+  :root {
+    --bg: #090d16;
+    --primary: #38bdf8;
+    --solana: #14f195;
+    --text: #f8fafc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+  .top-bar {
+    background: #0f172a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+  }
+  .title { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+  .title span { color: var(--primary); }
+  
+  .controls { display: flex; align-items: center; gap: 20px; }
+  .timer { font-size: 26px; font-weight: 800; font-family: monospace; color: var(--solana); min-width: 90px; }
+  .btn { background: var(--primary); color: #000; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
+  .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; }
+  .btn:hover { opacity: 0.9; }
+
+  .lang-toggle { display: flex; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 2px; }
+  .lang-btn { background: transparent; border: none; color: #94a3b8; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+  .lang-btn.active { background: var(--primary); color: #000; }
+
+  .main-area { display: flex; flex: 1; overflow: hidden; position: relative; }
+  
+  .prompter-box {
+    flex: 1;
+    overflow-y: scroll;
+    padding: 100px 80px 300px 80px;
+    scroll-behavior: smooth;
+  }
+  .prompter-box::-webkit-scrollbar { display: none; }
+
+  .text-block {
+    max-width: 900px;
+    margin: 0 auto;
+    font-size: 34px;
+    line-height: 1.6;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+  .section-tag {
+    display: inline-block;
+    color: var(--solana);
+    font-size: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 48px;
+    margin-bottom: 12px;
+    background: rgba(20, 241, 149, 0.1);
+    padding: 4px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(20, 241, 149, 0.2);
+  }
+  .highlight { color: var(--primary); font-weight: 700; }
+  .action-hint { color: #f59e0b; font-size: 20px; font-style: italic; display: block; margin: 8px 0 16px 0; }
+
+  .cam-box {
+    width: 360px;
+    background: #000;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  #webcam {
+    width: 100%;
+    aspect-ratio: 9/16;
+    border-radius: 16px;
+    background: #111;
+    object-fit: cover;
+    transform: scaleX(-1);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .cam-btn { margin-top: 14px; width: 100%; }
+</style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="title">🌊 Aqua<span>AI</span> — Founder Pitch Prompter</div>
+    <div class="controls">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">English (Recommended)</button>
+        <button class="lang-btn" id="btn-ru" onclick="setLang('ru')">Русский</button>
+      </div>
+      <div class="timer" id="timerDisplay">00:00</div>
+      <button class="btn" id="playBtn" onclick="togglePlay()">Start (Space)</button>
+      <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <div class="main-area">
+    <div class="prompter-box" id="prompterBox">
+      
+      <!-- English Script -->
+      <div class="text-block" id="content-en">
+        <span class="section-tag">[0:00 - 0:30] PART 1: WHO YOU ARE & THE ARAL CRISIS</span>
+        <span class="action-hint">(Look directly into the camera with confidence and calm urgency)</span>
+        <p>
+          "Hi Colosseum team and judges! My name is <span class="highlight">Salah</span>, and I am the founder of <span class="highlight">AquaAI</span>.
+        </p>
+        <br>
+        <p>
+          Central Asia is facing a massive environmental crisis: the ongoing depletion of the <span class="highlight">Aral Sea basin</span>. Agriculture here consumes <span class="highlight">over eighty percent</span> of all fresh water. And because regional farms still rely on unlined earthen canals and calendar flood irrigation, <span class="highlight">half of that water literally evaporates into thin air</span>.
+        </p>
+        <br>
+        <p>
+          We do not have decades to solve this — soil salinity and climate stress are compounding every single season.
+        </p>
+
+        <span class="section-tag">[0:30 - 1:10] PART 2: WHAT WE BUILT & WHY SOLANA</span>
+        <span class="action-hint">(Explain the product clearly: FAO-56 + Gemini + Solana)</span>
+        <p>
+          We built AquaAI to turn agricultural irrigation into an <span class="highlight">exact, verifiable science</span>.
+        </p>
+        <br>
+        <p>
+          AquaAI combines <span class="highlight">United Nations FAO-56 Penman-Monteith</span> hydrology, live <span class="highlight">Open-Meteo</span> weather forecasts, and <span class="highlight">Sentinel-2 satellite NDVI</span> with <span class="highlight">Google Gemini</span> to give farmers daily, precision watering schedules.
+        </p>
+        <br>
+        <p>
+          But calculating water demand is only half the battle. Regional governments and climate funds allocate millions of dollars in water subsidies, yet verification is entirely on paper and prone to fraud.
+        </p>
+        <br>
+        <p>
+          On <span class="highlight">Solana</span>, we cryptographically notarize every irrigation directive and water-saving event via the <span class="highlight">Solana Memo Program</span>. With sub-second finality and near-zero fees, Solana serves as the trustless settlement layer for verified green water subsidies and future DePIN water markets.
+        </p>
+
+        <span class="section-tag">[1:10 - 1:40] PART 3: WHY US & COLOSSEUM ACCELERATOR</span>
+        <span class="action-hint">(Conclude with passion: your domain edge and accelerator ambitions)</span>
+        <p>
+          Why are we the team to build this?
+        </p>
+        <br>
+        <p>
+          We have native roots in Central Asia. We understand the physical hydrology of the Syr Darya and Amu Darya river basins, the local regulatory framework, and real farmer adoption barriers. And technically, we ship fast: our full-stack platform and <span class="highlight">Solana Devnet</span> integration are live today.
+        </p>
+        <br>
+        <p>
+          We are applying to the <span class="highlight">Colosseum Accelerator</span> to scale this working MVP into live field pilots across <span class="highlight">ten thousand hectares</span> in Southern Kazakhstan and Uzbekistan, integrate DePIN smart water flow meters, and build Solana’s flagship climate protocol.
+        </p>
+        <br>
+        <p>
+          Thank you, and we’d love to join the Colosseum cohort!"
+        </p>
+      </div>
+
+      <!-- Russian Script -->
+      <div class="text-block" id="content-ru" style="display: none;">
+        <span class="section-tag">[0:00 - 0:30] ЧАСТЬ 1: КТО ВЫ И КРИЗИС АРАЛА</span>
+        <span class="action-hint">(Смотрите прямо в камеру, уверенная подача)</span>
+        <p>
+          «Привет команде Colosseum и судьям! Меня зовут <span class="highlight">Салах</span>, я основатель <span class="highlight">AquaAI</span>.
+        </p>
+        <br>
+        <p>
+          Центральная Азия сегодня переживает масштабную экологическую катастрофу — высыхание <span class="highlight">Аральского бассейна</span>. Сельское хозяйство потребляет <span class="highlight">свыше 80%</span> пресной воды, и из-за устаревшего арычного полива <span class="highlight">половина этой воды просто испаряется в воздух</span>.
+        </p>
+        <br>
+        <p>
+          У нас нет десятилетий на ожидание — засоление почв и засуха усиливаются каждый сезон.
+        </p>
+
+        <span class="section-tag">[0:30 - 1:10] ЧАСТЬ 2: ЧТО МЫ СОЗДАЛИ И ЗАЧЕМ SOLANA</span>
+        <p>
+          Мы создали AquaAI, чтобы превратить полив в <span class="highlight">точную, верифицируемую науку</span>.
+        </p>
+        <br>
+        <p>
+          AquaAI объединяет научную гидрологию <span class="highlight">FAO-56 Пенмана-Монтейса</span>, живые прогнозы <span class="highlight">Open-Meteo</span>, спутниковый вегетационный индекс <span class="highlight">Sentinel-2 NDVI</span> и искусственный интеллект <span class="highlight">Google Gemini</span>, выдавая фермеру точнейшие суточные директивы полива.
+        </p>
+        <br>
+        <p>
+          Но рассчитать воду — это лишь полдела. Государства выделяют миллионы на водные субсидии, но контроль ведется на бумаге.
+        </p>
+        <br>
+        <p>
+          В сети <span class="highlight">Solana</span> мы фиксируем криптографический SHA-256 хеш каждой рекомендации через <span class="highlight">Solana Memo Program</span>. Благодаря скорости и копеечным комиссиям, Solana становится неизменяемым реестром для 'зеленых' субсидий и будущих DePIN-рынков водных кредитов.
+        </p>
+
+        <span class="section-tag">[1:10 - 1:40] ЧАСТЬ 3: ПОЧЕМУ МЫ И АКСЕЛЕРАТОР COLOSSEUM</span>
+        <p>
+          Почему именно наша команда?
+        </p>
+        <br>
+        <p>
+          Мы родом из Центральной Азии. Мы детально знаем специфику речных бассейнов Сырдарьи и Амударьи, требования министерств и реальные проблемы фермеров. Наш продукт и аудит на <span class="highlight">Solana Devnet</span> работают уже сейчас.
+        </p>
+        <br>
+        <p>
+          Мы подаем заявку в <span class="highlight">Colosseum Accelerator</span>, чтобы масштабировать MVP в пилот на <span class="highlight">10 000 гектаров</span> в Южном Казахстане и Узбекистане, интегрировать DePIN счетчики расхода воды и создать главный климатический протокол на Solana.
+        </p>
+        <br>
+        <p>
+          Спасибо за внимание, будем рады встрече в акселераторе Colosseum!»
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Optional Webcam Mirror -->
+    <div class="cam-box">
+      <video id="webcam" autoplay playsinline muted></video>
+      <button class="btn btn-secondary cam-btn" onclick="toggleCam()">Enable Camera</button>
+    </div>
+  </div>
+
+<script>
+  let isPlaying = false;
+  let seconds = 0;
+  let timerInterval = null;
+  const box = document.getElementById('prompterBox');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const playBtn = document.getElementById('playBtn');
+
+  function setLang(l) {
+    document.getElementById('content-en').style.display = l === 'en' ? 'block' : 'none';
+    document.getElementById('content-ru').style.display = l === 'ru' ? 'block' : 'none';
+    document.getElementById('btn-en').classList.toggle('active', l === 'en');
+    document.getElementById('btn-ru').classList.toggle('active', l === 'ru');
+  }
+
+  function togglePlay() {
+    isPlaying = !isPlaying;
+    if (isPlaying) {
+      playBtn.innerText = "Pause (Space)";
+      playBtn.style.background = "#f59e0b";
+      timerInterval = setInterval(() => {
+        seconds++;
+        let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        let s = (seconds % 60).toString().padStart(2, '0');
+        timerDisplay.innerText = `${m}:${s}`;
+        box.scrollTop += 1.8;
+      }, 50);
+    } else {
+      playBtn.innerText = "Resume (Space)";
+      playBtn.style.background = "#38bdf8";
+      clearInterval(timerInterval);
+    }
+  }
+
+  function resetTimer() {
+    isPlaying = false;
+    clearInterval(timerInterval);
+    seconds = 0;
+    timerDisplay.innerText = "00:00";
+    playBtn.innerText = "Start (Space)";
+    playBtn.style.background = "#38bdf8";
+    box.scrollTop = 0;
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      togglePlay();
+    }
+  });
+
+  async function toggleCam() {
+    const v = document.getElementById('webcam');
+    if (v.srcObject) {
+      v.srcObject.getTracks().forEach(t => t.stop());
+      v.srcObject = null;
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        v.srcObject = stream;
+      } catch (err) {
+        alert("Camera permission denied or camera not found.");
+      }
+    }
+  }
+</script>
+</body>
+</html>

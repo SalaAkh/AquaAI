@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  body { background: #0b1120; color: #f8fafc; width: 1920px; height: 1080px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 60px 80px; position: relative; }
+  
+  .bg-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.18;
+    z-index: 0;
+  }
+  .glow-cyan { top: -100px; right: -100px; background: #06b6d4; }
+  .glow-purple { bottom: -100px; left: 100px; background: #9333ea; }
+  .glow-emerald { top: 300px; left: -100px; background: #10b981; }
+
+  .content { position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; }
+  .logo-group { display: flex; align-items: center; gap: 16px; }
+  .logo-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #0284c7, #06b6d4); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .logo-text { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo-text span { color: #38bdf8; }
+  .badge { background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); color: #38bdf8; padding: 8px 18px; border-radius: 999px; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+  .title-area { margin-top: 20px; }
+  .subtitle { color: #94a3b8; font-size: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+  .headline { font-size: 56px; font-weight: 800; line-height: 1.15; letter-spacing: -1px; }
+  .headline-gradient { background: linear-gradient(90deg, #38bdf8, #34d399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin: 40px 0; }
+  .card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 36px 30px; backdrop-filter: blur(12px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+  .card-icon { font-size: 36px; margin-bottom: 20px; }
+  .card-metric { font-size: 44px; font-weight: 800; color: #f8fafc; margin-bottom: 8px; }
+  .card-metric.accent { color: #38bdf8; }
+  .card-metric.emerald { color: #34d399; }
+  .card-metric.solana { background: linear-gradient(90deg, #9945ff, #14f195); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .card-title { font-size: 20px; font-weight: 700; color: #e2e8f0; margin-bottom: 10px; }
+  .card-desc { font-size: 16px; line-height: 1.5; color: #94a3b8; }
+
+  .footer { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .footer-left { display: flex; align-items: center; gap: 20px; color: #64748b; font-size: 16px; font-weight: 500; }
+  .solana-tag { display: flex; align-items: center; gap: 8px; color: #14f195; font-weight: 700; }
+  .footer-right { color: #94a3b8; font-size: 16px; }
+</style>
+</head>
+<body>
+  <div class="bg-glow glow-cyan"></div>
+  <div class="bg-glow glow-purple"></div>
+  <div class="bg-glow glow-emerald"></div>
+
+  <div class="content">
+    <div class="header">
+      <div class="logo-group">
+        <div class="logo-icon">🌊</div>
+        <div class="logo-text">Aqua<span>AI</span></div>
+      </div>
+      <div class="badge">Colosseum Hackathon & Accelerator Pitch</div>
+    </div>
+
+    <div class="title-area">
+      <div class="subtitle" id="sub">FOUNDER INTRODUCTION & REGIONAL CRISIS</div>
+      <div class="headline" id="head">The Aral Sea Basin Water Emergency<br><span class="headline-gradient" id="grad">80%+ Agricultural Consumption & 50% Canals Evaporation</span></div>
+    </div>
+
+    <div class="cards-grid" id="grid">
+      
+        <div class="card">
+          <div class="card-icon">🌊</div>
+          <div class="card-metric accent">80%+</div>
+          <div class="card-title">Aral Basin Depletion</div>
+          <div class="card-desc">Agriculture consumes over eighty percent of all regional fresh water, diverting Syr Darya and Amu Darya rivers.</div>
+        </div>
+        
+        <div class="card">
+          <div class="card-icon">💨</div>
+          <div class="card-metric emerald">50%</div>
+          <div class="card-title">Inundation Evaporative Waste</div>
+          <div class="card-desc">Unlined earthen canals and calendar flood irrigation lose half of all water volume into thin air.</div>
+        </div>
+        
+        <div class="card">
+          <div class="card-icon">⏳</div>
+          <div class="card-metric solana">CRITICAL</div>
+          <div class="card-title">Compounding Soil Salinity</div>
+          <div class="card-desc">We do not have decades: rising temperatures and salinization degrade fertile soils every single season.</div>
+        </div>
+        
+    </div>
+
+    <div class="footer">
+      <div class="footer-left">
+        <span>Founder: Salah</span>
+        <span>•</span>
+        <span>Central Asia Region (Kazakhstan & Aral Basin)</span>
+        <span>•</span>
+        <div class="solana-tag">⚡ Built on Solana Devnet</div>
+      </div>
+      <div class="footer-right">Colosseum Crypto World's Fair 2026</div>
+    </div>
+  </div>
+</body>
+</html>

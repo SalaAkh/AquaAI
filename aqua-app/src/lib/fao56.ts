@@ -54,7 +54,10 @@ export function calculateIrrigationRecommendation(
   forecast: DailyWeatherForecast[]
 ): IrrigationRecommendation {
   const kc = getCropCoefficient(farm.cropType, farm.growthStage);
-  const efficiency = IRRIGATION_EFFICIENCIES[farm.irrigationMethod]?.efficiency ?? 0.75;
+  const efficiency =
+    farm.customEfficiency && farm.customEfficiency > 0 && farm.customEfficiency <= 1
+      ? farm.customEfficiency
+      : IRRIGATION_EFFICIENCIES[farm.irrigationMethod]?.efficiency ?? 0.75;
   const baselineEfficiency = BASELINE_IRRIGATION_EFFICIENCY;
 
   const schedule: DailyIrrigationSchedule[] = [];

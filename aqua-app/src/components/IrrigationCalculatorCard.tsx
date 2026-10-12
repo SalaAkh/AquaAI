@@ -145,17 +145,19 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
             </p>
           </div>
 
-          <div className="flex flex-col sm:items-end gap-2">
+          <div className="flex flex-col sm:items-end gap-3">
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-300">{t.statusLabel}</span>
               {getActionBadge(recommendation.primaryAction === 'irrigate' ? 'irrigate' : 'skip')}
             </div>
             <button
+              id="calculate-irrigation-btn"
               onClick={onRefresh}
               disabled={isLoading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-all backdrop-blur-xs disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 text-xs font-black shadow-lg shadow-cyan-500/20 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
             >
-              {isLoading ? t.recalculating : t.refreshWeatherBtn}
+              <Droplets className={`w-4 h-4 text-slate-950 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>{isLoading ? (language === 'kk' ? 'Есептелуде...' : language === 'ru' ? 'Расчёт...' : 'Calculating...') : (language === 'kk' ? 'Суаруды есептеу' : language === 'ru' ? 'Рассчитать полив' : 'Calculate irrigation')}</span>
             </button>
           </div>
         </div>

@@ -11,6 +11,30 @@ export async function getAgronomicAdvisorExplanation(
   recommendation: IrrigationRecommendation,
   language: string = 'ru'
 ): Promise<AdvisorExplanation> {
+  // 1. Try Next.js server route first (handles GEMINI_API_KEY from server env securely)
+  try {
+    const apiRes = await fetch('/api/ai/advisor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recommendation, language }),
+    });
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data && data.summary) {
+        return {
+          summary: data.summary,
+          farmerAdvice: data.farmerAdvice,
+          conservationImpact: data.conservationImpact,
+          modelConfidence: data.modelConfidence || 'high',
+          source: data.source || 'gemini',
+        };
+      }
+    }
+  } catch {
+    // Continue to direct client or fallback
+  }
+
+  // 2. Client-side Gemini fallback if client key exists
   const apiKey =
     typeof process !== 'undefined'
       ? process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY
@@ -157,6 +181,24 @@ export async function getAgronomicChatReply(
   language: string = 'ru',
   history?: Array<{ role: string; text: string }>
 ): Promise<{ reply: string; source: 'gemini' | 'algorithmic_fallback' }> {
+  // 1. Try server route first
+  try {
+    const apiRes = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, farm, recommendation, language, history }),
+    });
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data && data.reply) {
+        return { reply: data.reply, source: data.source || 'gemini' };
+      }
+    }
+  } catch {
+    // Continue to direct client or fallback
+  }
+
+  // 2. Direct client fallback
   const apiKey =
     typeof process !== 'undefined'
       ? process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY

@@ -10,11 +10,14 @@ export interface Translations {
   brandName: string;
   brandTagline: string;
   tabDashboard: string;
+  tabFarms: string;
+  tabAdvisor: string;
   tabAnalytics: string;
   tabSatellite: string;
   tabBlockchain: string;
   tabSubsidies: string;
   tabAbout: string;
+  calculateIrrigationBtn: string;
   newFieldBtn: string;
   solanaConnected: string;
   connectWalletBtn: string;
@@ -320,11 +323,14 @@ const translations: Record<Language, Translations> = {
     brandName: 'AquaAI',
     brandTagline: 'Интеллектуальный полив для Центральной Азии',
     tabDashboard: 'Рабочая панель',
+    tabFarms: 'Управление полями',
+    tabAdvisor: 'ИИ-Советник',
     tabAnalytics: 'Аналитика расхода',
     tabSatellite: 'Спутник NDVI',
     tabBlockchain: 'Solana-аудит',
     tabSubsidies: 'Субсидии и сертификат',
     tabAbout: 'Кризис Арала',
+    calculateIrrigationBtn: 'Рассчитать полив',
     newFieldBtn: '+ Новое поле',
     solanaConnected: 'Solana Devnet ● Активен',
     connectWalletBtn: 'Подключить кошелёк',
@@ -629,11 +635,14 @@ const translations: Record<Language, Translations> = {
     brandName: 'AquaAI',
     brandTagline: 'Орталық Азияға арналған ақылды суару жүйесі',
     tabDashboard: 'Басқару тақтасы',
+    tabFarms: 'Егістіктерді басқару',
+    tabAdvisor: 'AI Кеңесші',
     tabAnalytics: 'Су шығыны талдауы',
     tabSatellite: 'Жерсерік NDVI',
     tabBlockchain: 'Solana аудиті',
     tabSubsidies: 'Субсидиялар мен сертификат',
     tabAbout: 'Арал дағдарысы',
+    calculateIrrigationBtn: 'Суаруды есептеу',
     newFieldBtn: '+ Жаңа алқап',
     solanaConnected: 'Solana Devnet ● Белсенді',
     connectWalletBtn: 'Әмиянды қосу',
@@ -938,11 +947,14 @@ const translations: Record<Language, Translations> = {
     brandName: 'AquaAI',
     brandTagline: 'Smart Irrigation Assistant for Central Asia',
     tabDashboard: 'Dashboard',
+    tabFarms: 'Farm Management',
+    tabAdvisor: 'AI Irrigation Advisor',
     tabAnalytics: 'Water Analytics',
     tabSatellite: 'Satellite NDVI',
     tabBlockchain: 'Blockchain Audit',
     tabSubsidies: 'Subsidies & Certificate',
     tabAbout: 'Aral Sea Crisis',
+    calculateIrrigationBtn: 'Calculate irrigation',
     newFieldBtn: '+ New Field',
     solanaConnected: 'Solana Devnet ● Connected',
     connectWalletBtn: 'Connect Wallet',
@@ -1250,13 +1262,13 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: 'ru',
+  language: 'en',
   setLanguage: () => {},
-  t: translations.ru,
+  t: translations.en,
 });
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>('ru');
+  const [language, setLanguageState] = useState<Language>('en');
 
   useEffect(() => {
     try {

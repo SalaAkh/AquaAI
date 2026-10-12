@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev": "next dev --webpack",
     "build:css": "node compile-css.mjs",
     "prebuild": "node compile-css.mjs",
     "build": "next build --webpack",
