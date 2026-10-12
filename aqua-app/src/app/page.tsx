@@ -66,17 +66,7 @@ function DashboardApp() {
   const loadAgronomicData = useCallback(async (farm: FarmProfile) => {
     setIsLoading(true);
     try {
-      let weatherRes: { forecast: DailyWeatherForecast[]; source: 'live' | 'fallback' };
-      try {
-        const res = await fetch(`/api/weather?lat=${farm.latitude}&lon=${farm.longitude}`);
-        if (res.ok) {
-          weatherRes = await res.json();
-        } else {
-          weatherRes = await fetchOpenMeteoForecast(farm.latitude, farm.longitude);
-        }
-      } catch {
-        weatherRes = await fetchOpenMeteoForecast(farm.latitude, farm.longitude);
-      }
+      const weatherRes = await fetchOpenMeteoForecast(farm.latitude, farm.longitude);
 
       setForecast(weatherRes.forecast);
       setWeatherSource(weatherRes.source);

@@ -1,0 +1,268 @@
+import { FarmProfile, IrrigationRecommendation } from './types';
+
+export type AdvisorExplanation = NonNullable<IrrigationRecommendation['aiExplanation']>;
+
+/**
+ * Client-compatible AI Advisor engine:
+ * Uses Google Gemini API if NEXT_PUBLIC_GEMINI_API_KEY is available,
+ * otherwise provides deterministic FAO-56 scientific agronomic guidance.
+ */
+export async function getAgronomicAdvisorExplanation(
+  recommendation: IrrigationRecommendation,
+  language: string = 'ru'
+): Promise<AdvisorExplanation> {
+  const apiKey =
+    typeof process !== 'undefined'
+      ? process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY
+      : undefined;
+
+  if (apiKey) {
+    try {
+      const prompt = `
+You are an expert FAO agronomic irrigation specialist assisting a farmer in Central Asia.
+Language for response: ${language === 'kk' ? 'Kazakh' : language === 'ru' ? 'Russian' : 'English'}.
+Explain the following calculated irrigation model results in simple, practical, actionable language.
+RULES:
+1. DO NOT invent soil moisture sensor readings, weather observations, or fictitious lab measurements.
+2. Rely strictly on the provided FAO-56 calculated parameters.
+3. Be clear about assumptions (application efficiency, Penman-Monteith ET0, regional flood baseline).
+4. Keep the tone helpful, professional, and clear for farm operators.
+
+INPUT DATA:
+- Farm: ${recommendation.farmName}
+- Period: ${recommendation.periodStart} to ${recommendation.periodEnd} (${recommendation.forecastDays} days)
+- Total Reference Evapotranspiration (ET0): ${(recommendation.schedule || []).reduce((acc, s) => acc + s.et0Mm, 0).toFixed(1)} mm
+- Total Crop Evapotranspiration (ETc): ${recommendation.totalEtcMm} mm
+- Forecast Rainfall: ${recommendation.totalPrecipitationMm} mm (Effective Recharge: ${recommendation.totalEffectiveRainfallMm} mm)
+- Recommended Gross Irrigation Depth: ${recommendation.totalGrossIrrigationMm} mm
+- Total Water Volume: ${recommendation.totalVolumeM3.toLocaleString()} m³
+- Baseline Flood Volume: ${recommendation.baselineTotalVolumeM3.toLocaleString()} m³
+- Potential Water Savings: ${recommendation.potentialTotalSavingsM3.toLocaleString()} m³ (${recommendation.potentialSavingsPercentage}%)
+- Primary Action: ${recommendation.primaryAction.toUpperCase()}
+- Application Timing Recommendation: ${recommendation.recommendedWindowSummary}
+
+Format your response strictly as valid JSON with keys:
+{
+  "summary": "1-2 sentence core recommendation stating total mm and whether rainfall covers demand.",
+  "farmerAdvice": "Clear, direct guidance on when and how to apply water to prevent evaporative loss.",
+  "conservationImpact": "Concise statement on cubic meters saved compared to regional flood irrigation.",
+  "modelConfidence": "high"
+}
+`;
+
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              temperature: 0.2,
+            },
+          }),
+        }
+      );
+
+      if (geminiRes.ok) {
+        const geminiData = await geminiRes.json();
+        const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawText) {
+          const parsed = JSON.parse(rawText);
+          return {
+            summary: parsed.summary,
+            farmerAdvice: parsed.farmerAdvice,
+            conservationImpact: parsed.conservationImpact,
+            modelConfidence: parsed.modelConfidence || 'high',
+            source: 'gemini',
+          };
+        }
+      }
+    } catch (geminiError) {
+      console.warn('Gemini API call failed, using deterministic agronomist engine:', geminiError);
+    }
+  }
+
+  // High-quality deterministic agronomic explanation fallback
+  const rainCoversDemand = recommendation.totalEffectiveRainfallMm >= recommendation.totalEtcMm;
+  const isWaterDeficit = recommendation.totalGrossIrrigationMm > 0;
+  const fName = recommendation.farmName || 'Field';
+  const windowText = recommendation.recommendedWindowSummary || '05:30 – 08:30';
+
+  if (language === 'kk') {
+    let summary = '';
+    if (rainCoversDemand) {
+      summary = `«${fName}» үшін күтілетін табиғи тиімді жауын-шашын (${recommendation.totalEffectiveRainfallMm} мм) дақылдың су қажеттілігін толық жабады. Суаруды тоқтата тұруға болады.`;
+    } else if (isWaterDeficit) {
+      summary = `«${fName}» шаруашылығына алдағы ${recommendation.forecastDays} күнде шамамен ${recommendation.totalGrossIrrigationMm} мм (${recommendation.totalVolumeM3.toLocaleString()} м³) суару қажет.`;
+    } else {
+      summary = `«${fName}» алқабындағы ылғал тепе-теңдігі қалыпты. Топырақ ылғалын бақылауды жалғастырыңыз.`;
+    }
+
+    return {
+      summary,
+      farmerAdvice: `Булануды азайту үшін суаруды ұсынылған уақыт аралығында (${windowText}) жүргізіңіз.`,
+      conservationImpact: `Бұл кестені сақтау дәстүрлі бастырумен салыстырғанда шамамен ${recommendation.potentialTotalSavingsM3.toLocaleString()} м³ (${recommendation.potentialSavingsPercentage}%) суды үнемдейді.`,
+      modelConfidence: 'high',
+      source: 'algorithmic_fallback',
+    };
+  }
+
+  if (language === 'ru') {
+    let summary = '';
+    if (rainCoversDemand) {
+      summary = `Для хозяйства «${fName}» ожидаемые эффективные осадки (${recommendation.totalEffectiveRainfallMm} мм) полностью покрывают потребность культуры в воде. Полив можно временно приостановить.`;
+    } else if (isWaterDeficit) {
+      summary = `Хозяйству «${fName}» требуется ориентировочно ${recommendation.totalGrossIrrigationMm} мм (${recommendation.totalVolumeM3.toLocaleString()} м³) полива на ближайшие ${recommendation.forecastDays} дней. Прогноз осадков (${recommendation.totalPrecipitationMm} мм) недостаточен для покрытия водного дефицита.`;
+    } else {
+      summary = `Водный баланс поля «${fName}» стабилен. Поддерживайте плановый мониторинг влажности почвы.`;
+    }
+
+    return {
+      summary,
+      farmerAdvice: `Распределите полив на утренние часы (${windowText}), чтобы исключить ветровой снос и пиковое испарение.`,
+      conservationImpact: `Соблюдение данного графика экономит ориентировочно ${recommendation.potentialTotalSavingsM3.toLocaleString()} м³ (${recommendation.potentialSavingsPercentage}%) по сравнению с традиционным затоплением.`,
+      modelConfidence: 'high',
+      source: 'algorithmic_fallback',
+    };
+  }
+
+  // English fallback
+  let summary = '';
+  if (rainCoversDemand) {
+    summary = `Effective forecast rainfall (${recommendation.totalEffectiveRainfallMm} mm) satisfies crop evapotranspiration for "${fName}". Irrigation can be suspended.`;
+  } else if (isWaterDeficit) {
+    summary = `Field "${fName}" requires approximately ${recommendation.totalGrossIrrigationMm} mm (${recommendation.totalVolumeM3.toLocaleString()} m³) of irrigation across ${recommendation.forecastDays} days.`;
+  } else {
+    summary = `Moisture balance is in equilibrium for "${fName}". Continue monitoring.`;
+  }
+
+  return {
+    summary,
+    farmerAdvice: `Apply water during the recommended window (${windowText}) to minimize evaporative flash.`,
+    conservationImpact: `Saves approximately ${recommendation.potentialTotalSavingsM3.toLocaleString()} m³ (${recommendation.potentialSavingsPercentage}%) vs. 50% flood irrigation baseline.`,
+    modelConfidence: 'high',
+    source: 'algorithmic_fallback',
+  };
+}
+
+/**
+ * Client-compatible AI Agronomic Chat:
+ */
+export async function getAgronomicChatReply(
+  message: string,
+  farm: FarmProfile | undefined,
+  recommendation: IrrigationRecommendation | undefined,
+  language: string = 'ru',
+  history?: Array<{ role: string; text: string }>
+): Promise<{ reply: string; source: 'gemini' | 'algorithmic_fallback' }> {
+  const apiKey =
+    typeof process !== 'undefined'
+      ? process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY
+      : undefined;
+
+  if (apiKey) {
+    try {
+      const systemInstruction = `
+You are an expert AI agricultural irrigation specialist serving farmers in Central Asia (Kazakhstan, Aral Sea Basin).
+Respond strictly in ${language === 'kk' ? 'Kazakh' : language === 'ru' ? 'Russian' : 'English'}.
+Keep responses concise (2-4 sentences max), highly practical, and rooted in FAO-56 irrigation principles.
+FARM CONTEXT:
+- Name: ${farm?.name || 'Central Asia Farm'}
+- Crop: ${farm?.cropType || 'cotton'}, Stage: ${farm?.growthStage || 'mid_season'}
+- Method: ${farm?.irrigationMethod || 'drip'}, Soil: ${farm?.soilType || 'loam'}
+- Area: ${farm?.fieldSizeHectares || 45} ha
+- Recommended Gross Irrigation: ${recommendation?.totalGrossIrrigationMm || 20} mm
+`;
+
+      const contents = [
+        ...(history || []).map((h) => ({
+          role: h.role === 'user' ? 'user' : 'model',
+          parts: [{ text: h.text }],
+        })),
+        {
+          role: 'user',
+          parts: [{ text: message }],
+        },
+      ];
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents,
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            generationConfig: {
+              temperature: 0.3,
+              maxOutputTokens: 500,
+            },
+          }),
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (replyText) {
+          return { reply: replyText, source: 'gemini' };
+        }
+      }
+    } catch (err) {
+      console.warn('Gemini chat failed, fallback to algorithmic response:', err);
+    }
+  }
+
+  // Rule-based fallback
+  const lower = message.toLowerCase();
+  let reply = '';
+
+  if (language === 'kk') {
+    if (lower.includes('ветер') || lower.includes('жел') || lower.includes('wind')) {
+      reply = `Жел жылдамдығы 15–18 км/сағ-тан асқан кезде жаңбырлатып суару тиімділігі жел ығысуынан 30–40%-ға төмендейді. «${farm?.name || 'Алқап'}» үшін суаруды таңертеңгі (05:00–08:30) немесе түнгі тымық сағаттарда жүргізуді қатаң ұсынамыз.`;
+    } else if (lower.includes('соль') || lower.includes('засол') || lower.includes('тұз') || lower.includes('salin')) {
+      reply = `Сырдария мен Арал өңірінің сортаң топырағында беткі аз суаруға жол берілмейді, өйткені тұздар тамырға тартылады. 10-15% шаю фракциясы бар тамшылатып суаруды және органикалық қышқылдандыруды қолдану қажет.`;
+    } else if (lower.includes('время') || lower.includes('уақыт') || lower.includes('когда') || lower.includes('when')) {
+      reply = `«${farm?.name || 'Алқап'}» үшін суарудың ең тиімді уақыты — таңғы 05:30-дан 09:00-ге дейін немесе кешкі 19:30-дан кейін. Бұл кезде ауа ылғалдылығы тапшылығы (VPD) төмен болып, судың тікелей ауаға ұшып кетуін болдырмайды.`;
+    } else if (lower.includes('удобр') || lower.includes('тыңайтқыш') || lower.includes('фертигац') || lower.includes('fert')) {
+      reply = `Фертигацияны суару жүйесі арқылы топырақты таза сумен 20-30 минут ылғалдандырғаннан кейін қосып, тамыр күйіп қалмауы үшін соңында жүйені таза сумен 30 минут шаю керек.`;
+    } else if (lower.includes('дождь') || lower.includes('жаңбыр') || lower.includes('rain')) {
+      reply = `Болжам бойынша ${recommendation?.totalPrecipitationMm || 0} мм жауын-шашын күтілуде. Егер тәуліктік жаңбыр 8-10 мм-ден асса, жоспарланған суаруды 24-48 сағатқа кейінге қалдырып, табиғи ылғалды пайдаланған жөн.`;
+    } else {
+      reply = `FAO-56 есебі бойынша «${farm?.name || 'Алқап'}» (${farm?.fieldSizeHectares || 45} га): ағымдағы брутто қажеттілік ${recommendation?.totalGrossIrrigationMm || 22} мм (${recommendation?.totalVolumeM3?.toLocaleString() || '10,000'} м³). Тамыр қабатындағы ылғалдылықты далалық сыйымдылықтың 65–80% деңгейінде ұстаңыз.`;
+    }
+  } else if (language === 'ru') {
+    if (lower.includes('ветер') || lower.includes('жел') || lower.includes('wind')) {
+      reply = `При скорости ветра выше 15–18 км/ч эффективность дождевания снижается на 30–40% из-за ветрового сноса и неравномерного распределения капель. Настоятельно рекомендуем поливать в утренние часы (05:00–08:30) или ночью, когда воздух спокоен.`;
+    } else if (lower.includes('соль') || lower.includes('засол') || lower.includes('тұз') || lower.includes('salin')) {
+      reply = `В условиях засоления почв (особенно бассейна Сырдарьи и Арала) недопустим недостаточный поверхностный полив. Рекомендуется промывной режим с фракцией выщелачивания (10-15%) и применение капельного полива.`;
+    } else if (lower.includes('время') || lower.includes('уақыт') || lower.includes('когда') || lower.includes('when')) {
+      reply = `Оптимальное окно полива для поля «${farm?.name || ''}» — с 05:30 до 09:00 или после 19:30. В это время дефицит давления пара (VPD) минимален, предотвращая потерю до 25% воды на испарение.`;
+    } else if (lower.includes('удобр') || lower.includes('тыңайтқыш') || lower.includes('фертигац') || lower.includes('fert')) {
+      reply = `Фертигацию следует начинать после предварительного увлажнения почвы чистой водой (первые 20-30% цикла) и завершать промывкой системы чистой водой в течение 30 минут.`;
+    } else if (lower.includes('дождь') || lower.includes('жаңбыр') || lower.includes('rain')) {
+      reply = `По прогнозу ожидается ${recommendation?.totalPrecipitationMm || 0} мм осадков. Если дождь превышает 8-10 мм, запланированный полив следует отложить на 24-48 часов для полной экономии ресурса.`;
+    } else {
+      reply = `На основе расчёта FAO-56 для поля «${farm?.name || 'Поле'}» (${farm?.fieldSizeHectares || 45} га): брутто-потребность составляет ${recommendation?.totalGrossIrrigationMm || 22} мм (${recommendation?.totalVolumeM3?.toLocaleString() || '10,000'} м³). Держите влажность в корневом горизонте на уровне 65–80% от ППВ.`;
+    }
+  } else {
+    // English
+    if (lower.includes('wind') || lower.includes('ветер') || lower.includes('жел')) {
+      reply = `At wind speeds exceeding 15–18 km/h, overhead spray efficiency drops by 30–40% due to canopy drift. We strongly advise scheduling applications during calm morning hours (05:00–08:30) or nighttime.`;
+    } else if (lower.includes('salt') || lower.includes('salin') || lower.includes('засол') || lower.includes('тұз')) {
+      reply = `Under salinity conditions in the Aral Basin, under-irrigation causes toxic capillary salt accumulation. Maintain a calculated leaching fraction of 10–15% alongside localized drip fertigation.`;
+    } else if (lower.includes('time') || lower.includes('when') || lower.includes('время') || lower.includes('уақыт')) {
+      reply = `Optimal irrigation timing for "${farm?.name || 'your field'}" is 05:30–09:00 or after 19:30. Vapor pressure deficit (VPD) is minimized during these periods, preventing direct evaporative loss.`;
+    } else if (lower.includes('fert') || lower.includes('удобр') || lower.includes('тыңайтқыш')) {
+      reply = `Start fertigation after wetting the root zone with clean water (first 20-30% of the cycle), and flush system with clean water for 30 minutes at the end.`;
+    } else if (lower.includes('rain') || lower.includes('дождь') || lower.includes('жаңбыр')) {
+      reply = `Forecast shows ${recommendation?.totalPrecipitationMm || 0} mm of rain. If daily rainfall exceeds 8-10 mm, postpone scheduled irrigation by 24-48 hours.`;
+    } else {
+      reply = `Based on FAO-56 modeling for "${farm?.name || 'Field'}" (${farm?.fieldSizeHectares || 45} ha): gross irrigation requirement is ${recommendation?.totalGrossIrrigationMm || 22} mm (${recommendation?.totalVolumeM3?.toLocaleString() || '10,000'} m³). Maintain root-zone moisture between 65-80% of field capacity.`;
+    }
+  }
+
+  return { reply, source: 'algorithmic_fallback' };
+}

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { FarmProfile, IrrigationRecommendation } from '@/lib/types';
 import { useTranslation, getLocalizedWindow } from '@/lib/i18n';
+import { getAgronomicAdvisorExplanation, getAgronomicChatReply } from '@/lib/ai-service';
 
 interface AiAdvisorCardProps {
   recommendation: IrrigationRecommendation;
@@ -114,25 +115,10 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
   const handleAskGemini = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/ai/advisor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recommendation, language }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const updated = {
-          summary: data.summary,
-          farmerAdvice: data.farmerAdvice,
-          conservationImpact: data.conservationImpact,
-          modelConfidence: data.modelConfidence || 'high',
-          source: data.source || 'gemini',
-        };
-        setExplanation(updated);
-        if (onUpdateExplanation) {
-          onUpdateExplanation(updated);
-        }
+      const updated = await getAgronomicAdvisorExplanation(recommendation, language);
+      setExplanation(updated);
+      if (onUpdateExplanation) {
+        onUpdateExplanation(updated);
       }
     } catch (err) {
       console.error('Failed to query AI advisor:', err);
@@ -156,31 +142,21 @@ export const AiAdvisorCard: React.FC<AiAdvisorCardProps> = ({
     setIsSending(true);
 
     try {
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: q,
-          recommendation,
-          farm,
-          language,
-          history: chatMessages.slice(-4),
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            role: 'model',
-            text: data.reply,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          },
-        ]);
-      } else {
-        throw new Error('Chat failed');
-      }
+      const { reply } = await getAgronomicChatReply(
+        q,
+        farm,
+        recommendation,
+        language,
+        chatMessages.slice(-4)
+      );
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: 'model',
+          text: reply,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
     } catch {
       setChatMessages((prev) => [
         ...prev,
