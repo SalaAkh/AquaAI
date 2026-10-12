@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./aqua-app
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Run Agricultural Hydrology Tests
         working-directory: ./aqua-app
