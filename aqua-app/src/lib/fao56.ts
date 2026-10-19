@@ -107,7 +107,7 @@ export function calculateIrrigationRecommendation(
     // Check upcoming rain in the next 24-48 hours
     const nextDayPrecip = forecast[index + 1]?.precipitationMm ?? 0;
 
-    if (day.precipitationMm >= 5 || effRainMm >= etcMm) {
+    if (effRainMm >= etcMm) {
       action = 'skip';
       actionReason = `Natural precipitation (${day.precipitationMm} mm) satisfies or exceeds crop water demand.`;
       recommendedWindow = 'No irrigation required';
@@ -116,8 +116,8 @@ export function calculateIrrigationRecommendation(
       actionReason = `Significant rain (${nextDayPrecip} mm) forecasted tomorrow. Delay to avoid deep percolation waste.`;
       recommendedWindow = 'Delay until post-storm assessment';
     } else if (netIrrigationMm < 1.0) {
-      action = 'skip';
-      actionReason = 'Minimal moisture deficit (< 1.0 mm). Soil root reserve is adequate.';
+      action = 'delay';
+      actionReason = 'Small modelled deficit: check actual soil moisture before irrigating.';
       recommendedWindow = 'No irrigation required';
     } else if (day.tempMaxC > 32) {
       // High daytime heat in Central Asia: recommend night/evening irrigation to avoid massive evaporative loss
