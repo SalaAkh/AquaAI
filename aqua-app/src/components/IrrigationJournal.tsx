@@ -14,6 +14,14 @@ type IrrigationEntry = {
 };
 
 const KEY = 'aqua_irrigation_log_v1';
+function calculateFromPump(rate: string, hours: string): number | null {
+  if (rate.trim() === '' || hours.trim() === '') return null;
+  const m3h = Number(rate); const h = Number(hours);
+  if (!Number.isFinite(m3h) || !Number.isFinite(h) || m3h <= 0 || h <= 0) return null;
+  const total = m3h * h;
+  return Number.isFinite(total) && total <= 1_000_000_000 ? Math.round(total * 10) / 10 : null;
+}
+
 
 function readEntries(): IrrigationEntry[] {
   try {
@@ -40,6 +48,8 @@ export function IrrigationJournal({ farm, recommendation }: {
   const [volume, setVolume] = useState('');
   const [source, setSource] = useState<'meter' | 'pump_estimate'>('meter');
   const [notes, setNotes] = useState('');
+  const [pumpRate, setPumpRate] = useState('');
+  const [pumpHours, setPumpHours] = useState('');
   const [message, setMessage] = useState('');
 
   useEffect(() => { setEntries(readEntries()); }, []);
@@ -55,8 +65,8 @@ export function IrrigationJournal({ farm, recommendation }: {
 
   function addEntry(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const actualM3 = Number(volume);
-    if (!date || !Number.isFinite(actualM3) || actualM3 < 0 || volume.trim() === '') {
+    const actualM3 = source === 'meter' ? Number(volume) : calculateFromPump(pumpRate, pumpHours);
+    if (!date || actualM3 === null || !Number.isFinite(actualM3) || actualM3 < 0 || (source === 'meter' && volume.trim() === '')) {
       setMessage('Укажите дату и корректный объём воды.');
       return;
     }
@@ -72,7 +82,7 @@ export function IrrigationJournal({ farm, recommendation }: {
     try {
       localStorage.setItem(KEY, JSON.stringify(updated));
       setEntries(updated);
-      setVolume(''); setNotes('');
+      setVolume(''); setPumpRate(''); setPumpHours(''); setNotes('');
       setMessage('Запись сохранена в этом браузере.');
     } catch {
       setMessage('Не удалось сохранить запись: проверьте доступное место в браузере.');
@@ -95,7 +105,7 @@ export function IrrigationJournal({ farm, recommendation }: {
         <h2 className="text-xl font-bold text-slate-900">Журнал фактических поливов</h2>
         <p className="mt-1 text-sm text-slate-600">
           Сравнивайте расчётную норму с водой, которую действительно подали на поле «{farm.name}».
-          Записи сохраняются только в текущем браузере. Это не верифицированная экономия воды.
+          Записи сохраняются только в текущем браузере. Расход по насосу — оценка, не измерение. Это не верифицированная экономия воды.
         </p>
       </div>
       <form onSubmit={addEntry} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
@@ -104,12 +114,24 @@ export function IrrigationJournal({ farm, recommendation }: {
           <input type="date" required value={date} onChange={e => setDate(e.target.value)}
             className="mt-1 w-full border rounded-xl px-3 py-2 text-sm" />
         </label>
-        <label className="block text-xs font-medium text-slate-700">
+        {source === 'meter' && <label className="block text-xs font-medium text-slate-700">
           Фактический объём, м³
           <input type="number" required min="0" max="1000000000" step="0.1" placeholder="Например, 250"
             value={volume} onChange={e => setVolume(e.target.value)}
             className="mt-1 w-full border rounded-xl px-3 py-2 text-sm" />
-        </label>
+        </label>}
+        {source === 'pump_estimate' && <>
+          <label className="block text-xs font-medium text-slate-700">
+            Производительность насоса, м³/ч
+            <input required type="number" min="0.01" step="0.01" value={pumpRate} onChange={e => setPumpRate(e.target.value)}
+              className="mt-1 w-full border rounded-xl px-3 py-2 text-sm" />
+          </label>
+          <label className="block text-xs font-medium text-slate-700">
+            Продолжительность, часов
+            <input required type="number" min="0.01" step="0.01" value={pumpHours} onChange={e => setPumpHours(e.target.value)}
+              className="mt-1 w-full border rounded-xl px-3 py-2 text-sm" />
+          </label>
+        </>}
         <label className="block text-xs font-medium text-slate-700">
           Источник данных
           <select value={source} onChange={e => setSource(e.target.value as IrrigationEntry['source'])}

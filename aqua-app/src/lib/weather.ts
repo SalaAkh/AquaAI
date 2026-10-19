@@ -55,7 +55,7 @@ export async function fetchOpenMeteoForecast(
     url.searchParams.set('longitude', longitude.toFixed(4));
     url.searchParams.set(
       'daily',
-      'weather_code,temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum,et0_fao_evapotranspiration,wind_speed_10m_max,shortwave_radiation_sum'
+      'weather_code,temperature_2m_max,temperature_2m_min,temperature_2m_mean,precipitation_sum,et0_fao_evapotranspiration,wind_speed_10m_max,shortwave_radiation_sum,relative_humidity_2m_mean'
     );
     url.searchParams.set('timezone', 'auto');
     url.searchParams.set('forecast_days', '7');
@@ -101,7 +101,7 @@ export async function fetchOpenMeteoForecast(
         tempMeanC: Number(tMean.toFixed(1)),
         precipitationMm: Number(precip.toFixed(1)),
         et0Mm: Number(et0.toFixed(2)),
-        relativeHumidityPercent: Math.min(95, Math.max(20, Math.round(55 - (tMax - 20) * 1.5))),
+        relativeHumidityPercent: Math.min(100, Math.max(0, Number(daily.relative_humidity_2m_mean?.[idx] ?? 50))),
         windSpeedKmh: Number(windSpeed.toFixed(1)),
         solarRadiationMj: Number(radiation.toFixed(1)),
         weatherCode: code,

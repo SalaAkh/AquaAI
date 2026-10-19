@@ -35,6 +35,7 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
   }, [farm, baselineKc]);
 
   const handleApply = () => {
+    // Simulated satellite grid must never modify operational irrigation guidance.
     if (onApplySatelliteKc) {
       onApplySatelliteKc(data.satelliteAdjustedKc);
       setIsApplied(true);
@@ -294,7 +295,7 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
             )}
           </div>
 
-          {/* Calibrate FAO-56 Button */}
+          {/* Demo-only Kc estimate; this must not affect live irrigation figures. */}
           <div className="p-4 rounded-2xl bg-gradient-to-br from-teal-50 to-emerald-50 border border-teal-200/80">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-teal-600" />
@@ -307,13 +308,16 @@ export const SatelliteNdviCard: React.FC<SatelliteNdviCardProps> = ({
             </p>
             <button
               onClick={handleApply}
+              disabled={!onApplySatelliteKc}
               className={`w-full py-2.5 px-3 rounded-xl font-semibold text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 ${
                 isApplied
                   ? 'bg-emerald-600 text-white'
                   : 'bg-slate-900 text-white hover:bg-slate-800'
               }`}
             >
-              {isApplied ? (
+              {!onApplySatelliteKc ? (
+                <span>Demo only — real satellite data required</span>
+              ) : isApplied ? (
                 <>
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{t.kcApplied}</span>
