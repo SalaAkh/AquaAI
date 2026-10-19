@@ -31,18 +31,19 @@
 
 ---
 
-> **🏆 Colosseum Crypto World's Fair 2026 Hackathon MVP**  
+> **🏆 Конкурс стартапов IDEA MINERS 2026 / Colosseum Hackathon MVP**  
 > *Smarter Irrigation. Every Drop Counts. | Умный полив. Каждая капля на счету. | Ақылды суару. Әрбір тамшы маңызды.*
 
 ---
 
 ## ⚡ Быстрые ссылки / Quick Links
 
-- 🌐 **[Онлайн Демо Сайт (Live Preview)](https://aqua-ai-demo.loca.lt)** *(Туннель запущен прямо сейчас)*
+- 📋 **[Материалы для IDEA MINERS 2026 (Pitch Deck, Скрипты, Ответы жюри)](docs/IDEA_MINERS_SUBMISSION.md)**
+- 🗄️ **[Руководство по настройке Supabase PostgreSQL (RLS)](docs/SUPABASE_SETUP.md)**
 - 🚀 **[Развернуть в 1 клик на Vercel (Production)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&project-name=aqua-ai&root-directory=aqua-app)**
-- 🎬 **[Материалы питча и видео (Media Hub)](media/pitch/README.md)**
+- 🎬 **[Материалы питча и медиа (Media Hub)](media/pitch/README.md)**
 - 📁 **[Репозиторий GitHub](https://github.com/SalaAkh/AquaAI)**
-- 📑 **[Архитектура и формулы](#-научный-агрономический-движок-fao-56)**
+- 📑 **[Архитектура и формулы FAO-56](#-научный-агрономический-движок-fao-56)**
 
 ---
 
@@ -201,20 +202,26 @@ docker run -d -p 3000:3000 --name aqua-ai-prod aqua-ai
 
 ---
 
-### Вариант 5: Локальная разработка
+### Вариант 5: Локальная разработка и тестирование
 
 ```bash
 # 1. Клонирование репозитория
 git clone https://github.com/SalaAkh/AquaAI.git
-cd AquaAI
+cd AquaAI/aqua-app
 
-# 2. Установка зависимостей
-npm install --prefix aqua-app
+# 2. Воспроизводимая чистая установка зависимостей
+npm ci
 
-# 3. Запуск модульных тестов гидрологии
+# 3. Запуск тестов (Unit FAO-56 + Integration)
 npm test
 
-# 4. Запуск сервера разработки
+# 4. Проверка статической типизации TypeScript
+npm run typecheck
+
+# 5. Production сборка Next.js
+npm run build
+
+# 6. Запуск сервера разработки
 npm run dev
 ```
 
@@ -222,22 +229,18 @@ npm run dev
 
 ---
 
-## 🧪 Модульное тестирование
+## 🧪 Комплексное тестирование
 
-В проекте реализованы тесты для валидации гидрологических формул:
-```bash
-npm test
-```
-
-Вывод тестов:
-```
-Running AquaAI Agricultural Hydrology & FAO-56 Unit Tests...
-✔ testDepthToVolumeM3 passed (1 mm × 1 ha = 10 m³)
-✔ testCropEvapotranspiration passed (ETc = ET0 × Kc)
-✔ testEffectiveRainfall passed (USDA SCS bounds)
-✔ testGrossWaterRequirement passed (Application efficiency adjustment)
-All water calculation unit tests PASSED successfully!
-```
+В проекте реализована трехуровневая система тестов:
+1. **Гидрологические тесты FAO-56 (`tests/fao56.test.mjs`)**:
+   - Формулы $ET_c = ET_0 \times K_c$, эффективные осадки, перевод глубин в объём (1 мм × 1 га = 10 м³).
+   - Расчёт подачи насоса ($м^3 = Q \times t$), дельта расходомера, экстремальная жара и перелив.
+2. **Интеграционные тесты (`tests/integration.test.mjs`)**:
+   - Авторизация, CRUD хозяйств и полей, спецификации насосов.
+   - Учёт расхода воды (все 3 метода), план-факт отклонения, пользовательские тарифы.
+   - Схема и дисклеймеры AI-агронома.
+3. **Сквозной жизненный цикл E2E (`tests/test_e2e_journey.mjs`)**:
+   - 10-этапная симуляция пути фермера от создания поля до выгрузки ROI.
 
 ---
 

@@ -3,5 +3,5 @@
   "framework": "nextjs",
   "buildCommand": "npm --prefix aqua-app run build",
   "outputDirectory": "aqua-app/.next",
-  "installCommand": "npm --prefix aqua-app install"
+  "installCommand": "npm --prefix aqua-app ci"
 }

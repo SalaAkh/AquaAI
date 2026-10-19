@@ -14,10 +14,14 @@ import {
   ChevronDown,
   Sprout,
   Sparkles,
+  User,
+  Database,
 } from 'lucide-react';
 import { FarmProfile } from '@/lib/types';
 import { useTranslation } from '@/lib/i18n';
 import { useSolanaWallet } from '@/lib/wallet';
+import { useAuth } from '@/lib/auth-context';
+import { AuthModal } from './AuthModal';
 
 export type NavTabType =
   | 'dashboard'
@@ -47,6 +51,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
 }) => {
   const { t, language, setLanguage } = useTranslation();
+  const { user, isDemo, isCloudConnected } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
   const {
     publicKey,
     shortAddress,
@@ -127,11 +133,36 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Add New Field Button */}
             <button
               onClick={onOpenNewFarmModal}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-white active:scale-95 transition-all shadow-2xs shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-white active:scale-95 transition-all shadow-2xs shrink-0 cursor-pointer"
               title={t.newFieldBtn}
             >
               <Plus className="w-3.5 h-3.5" />
               <span className="hidden md:inline">{t.newFieldBtn}</span>
+            </button>
+
+            {/* Auth / DB Status Button */}
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer shadow-2xs shrink-0 ${
+                isCloudConnected
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+              }`}
+              title="Личный кабинет / Настройки подключения к БД"
+            >
+              {isCloudConnected ? (
+                <Database className="w-3.5 h-3.5 text-emerald-600" />
+              ) : (
+                <User className="w-3.5 h-3.5 text-slate-500" />
+              )}
+              <span className="max-w-[110px] truncate hidden sm:inline">
+                {user ? user.fullName.split(' ')[0] : 'Вход'}
+              </span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                isCloudConnected ? 'bg-emerald-200/60 text-emerald-800' : 'bg-slate-200 text-slate-600'
+              }`}>
+                {isCloudConnected ? 'Cloud' : 'Demo'}
+              </span>
             </button>
 
             {/* Solana Web3 Wallet Button / Badge */}
@@ -225,6 +256,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
         </div>
       </div>
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </header>
   );
 };

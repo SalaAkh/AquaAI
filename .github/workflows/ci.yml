@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./aqua-app
-        run: npm install --no-audit --no-fund # TODO: regenerate legacy lockfile and restore npm ci
+        run: npm ci
 
       - name: Run Agricultural Hydrology Tests
         working-directory: ./aqua-app

@@ -23,14 +23,15 @@ import { calculateIrrigationRecommendation } from '@/lib/fao56';
 import { generateCentralAsiaFallbackForecast } from '@/lib/weather';
 import { LanguageProvider, useTranslation, getCropLabel, getGrowthStageInfo } from '@/lib/i18n';
 import { WalletProvider } from '@/lib/wallet';
+import { AuthProvider, useAuth } from '@/lib/auth-context';
 import {
-  getActiveFarmId,
-  getSavedFarms,
-  saveFarmProfile,
-  deleteFarmProfile,
-  setActiveFarmId,
-  saveRecommendationToHistory,
-} from '@/lib/storage';
+  getFarms,
+  saveFarm,
+  deleteFarm,
+  getActiveFarmIdLocal,
+  setActiveFarmIdLocal,
+} from '@/lib/db-service';
+import { saveRecommendationToHistory } from '@/lib/storage';
 import {
   Sprout,
   Droplets,
@@ -47,6 +48,7 @@ import {
 
 function DashboardApp() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [farms, setFarms] = useState<FarmProfile[]>([DEMO_FARM_TURKISTAN]);
   const [currentFarm, setCurrentFarm] = useState<FarmProfile>(DEMO_FARM_TURKISTAN);
   const [activeTab, setActiveTab] = useState<NavTabType>('dashboard');
@@ -61,14 +63,21 @@ function DashboardApp() {
   const [recommendation, setRecommendation] = useState<IrrigationRecommendation | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Load farms from storage on initial mount
+  // Load farms from db-service on initial mount or user change
   useEffect(() => {
-    const loadedFarms = getSavedFarms();
-    setFarms(loadedFarms);
-    const activeId = getActiveFarmId();
-    const active = loadedFarms.find((f) => f.id === activeId) || loadedFarms[0] || DEMO_FARM_TURKISTAN;
-    setCurrentFarm(active);
-  }, []);
+    let isMounted = true;
+    getFarms(user?.id).then((loadedFarms) => {
+      if (isMounted) {
+        setFarms(loadedFarms);
+        const activeId = getActiveFarmIdLocal();
+        const active = loadedFarms.find((f) => f.id === activeId) || loadedFarms[0] || DEMO_FARM_TURKISTAN;
+        setCurrentFarm(active);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
 
   // Compute recommendation when farm or weather changes
   const loadAgronomicData = useCallback(async (farm: FarmProfile) => {
@@ -116,11 +125,11 @@ function DashboardApp() {
 
   const handleSelectFarm = (farm: FarmProfile) => {
     setCurrentFarm(farm);
-    setActiveFarmId(farm.id);
+    setActiveFarmIdLocal(farm.id);
   };
 
-  const handleSaveFarm = (savedFarm: FarmProfile) => {
-    const updated = saveFarmProfile(savedFarm);
+  const handleSaveFarm = async (savedFarm: FarmProfile) => {
+    const updated = await saveFarm(savedFarm, user?.id);
     setFarms(updated);
     setCurrentFarm(savedFarm);
     setIsFarmModalOpen(false);
@@ -128,13 +137,13 @@ function DashboardApp() {
     loadAgronomicData(savedFarm);
   };
 
-  const handleDeleteFarm = (farmId: string) => {
-    const updated = deleteFarmProfile(farmId);
+  const handleDeleteFarm = async (farmId: string) => {
+    const updated = await deleteFarm(farmId, user?.id);
     setFarms(updated);
     if (currentFarm.id === farmId) {
       const nextActive = updated[0] || DEMO_FARM_TURKISTAN;
       setCurrentFarm(nextActive);
-      setActiveFarmId(nextActive.id);
+      setActiveFarmIdLocal(nextActive.id);
     }
   };
 
@@ -283,21 +292,22 @@ function DashboardApp() {
         ========================================================================= */}
         {activeTab === 'dashboard' && (
           <div className="space-y-8 animate-in fade-in duration-300">
-            {/* 1. Open-Meteo Weather Component with Loading Skeleton & Forecast Chart */}
-            <WeatherWidget
-              forecast={forecast}
-              source={weatherSource}
-              locationName={currentFarm.locationName}
-              isLoading={isLoading}
-              error={weatherError}
-              onRetry={() => loadAgronomicData(currentFarm)}
-            />
-
+            {/* 1. Today's Irrigation Plan & Primary CTA */}
             {recommendation && (
-              <TodayIrrigationCard recommendation={recommendation} weatherSource={weatherSource} />
+              <TodayIrrigationCard
+                recommendation={recommendation}
+                weatherSource={weatherSource}
+                onLogIrrigationClick={() => {
+                  const el = document.getElementById('irrigation-entry-form') || document.getElementById('irrigation-tracking-section');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+              />
             )}
 
-            {/* 2. Irrigation Recommendation Card with Prominent “Calculate irrigation” Button */}
+            {/* 2. Water Usage Tracking (Journal with 3 input modes & history) */}
+            {recommendation && <IrrigationJournal farm={currentFarm} recommendation={recommendation} />}
+
+            {/* 3. 7-Day FAO-56 Irrigation Recommendation Card */}
             {recommendation && (
               <IrrigationCalculatorCard
                 recommendation={recommendation}
@@ -307,14 +317,22 @@ function DashboardApp() {
               />
             )}
 
-            {recommendation && <IrrigationJournal farm={currentFarm} recommendation={recommendation} />}
+            {/* 4. Open-Meteo Weather Forecast */}
+            <WeatherWidget
+              forecast={forecast}
+              source={weatherSource}
+              locationName={currentFarm.locationName}
+              isLoading={isLoading}
+              error={weatherError}
+              onRetry={() => loadAgronomicData(currentFarm)}
+            />
 
-            {/* 3. Weather & Water Demand Analytics Chart */}
+            {/* 5. Water & Cost Analytics Chart (with custom tariffs & PDF report) */}
             {recommendation && (
               <WaterAnalyticsChart recommendation={recommendation} farm={currentFarm} />
             )}
 
-            {/* 4. Gemini AI Agronomic Advisor Highlight Card */}
+            {/* 6. Gemini AI Agronomic Advisor Highlight Card */}
             {recommendation && (
               <AiAdvisorCard
                 recommendation={recommendation}
@@ -325,29 +343,6 @@ function DashboardApp() {
                   }
                 }}
               />
-            )}
-
-            {/* 5. Satellite Sentinel-2 NDVI & Soil Moisture Benchmark (Labeled as Sample Data) */}
-            {recommendation && (
-              <div className="space-y-8">
-                <SatelliteNdviCard
-                  farm={currentFarm}
-                  baselineKc={recommendation.schedule[0]?.kc ?? 1.15}
-                  
-                />
-                <SoilMoistureSensorCard farm={currentFarm} />
-              </div>
-            )}
-
-            {/* 6. Blockchain & Subsidies Preview */}
-            {recommendation && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <WaterSubsidiesCard recommendation={recommendation} farm={currentFarm} />
-                <SolanaVerifierCard
-                  recommendation={recommendation}
-                  onProofCreated={handleProofCreated}
-                />
-              </div>
             )}
           </div>
         )}
@@ -474,10 +469,12 @@ function DashboardApp() {
 
 export default function HomePage() {
   return (
-    <LanguageProvider>
-      <WalletProvider>
-        <DashboardApp />
-      </WalletProvider>
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <WalletProvider>
+          <DashboardApp />
+        </WalletProvider>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
