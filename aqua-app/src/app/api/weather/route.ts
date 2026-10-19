@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const lat = latParam ? parseFloat(latParam) : 43.3015;
     const lon = lonParam ? parseFloat(lonParam) : 68.2723;
 
-    if (isNaN(lat) || isNaN(lon)) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
       return NextResponse.json({ error: 'Invalid latitude or longitude coordinates' }, { status: 400 });
     }
 

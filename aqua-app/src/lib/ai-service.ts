@@ -4,7 +4,7 @@ export type AdvisorExplanation = NonNullable<IrrigationRecommendation['aiExplana
 
 /**
  * Client-compatible AI Advisor engine:
- * Uses Google Gemini API if NEXT_PUBLIC_GEMINI_API_KEY is available,
+ * Uses a secure server API route for optional Google Gemini responses,
  * otherwise provides deterministic FAO-56 scientific agronomic guidance.
  */
 export async function getAgronomicAdvisorExplanation(
@@ -34,79 +34,7 @@ export async function getAgronomicAdvisorExplanation(
     // Continue to direct client or fallback
   }
 
-  // 2. Client-side Gemini fallback if client key exists
-  const apiKey =
-    typeof process !== 'undefined'
-      ? process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY
-      : undefined;
-
-  if (apiKey) {
-    try {
-      const prompt = `
-You are an expert FAO agronomic irrigation specialist assisting a farmer in Central Asia.
-Language for response: ${language === 'kk' ? 'Kazakh' : language === 'ru' ? 'Russian' : 'English'}.
-Explain the following calculated irrigation model results in simple, practical, actionable language.
-RULES:
-1. DO NOT invent soil moisture sensor readings, weather observations, or fictitious lab measurements.
-2. Rely strictly on the provided FAO-56 calculated parameters.
-3. Be clear about assumptions (application efficiency, Penman-Monteith ET0, regional flood baseline).
-4. Keep the tone helpful, professional, and clear for farm operators.
-
-INPUT DATA:
-- Farm: ${recommendation.farmName}
-- Period: ${recommendation.periodStart} to ${recommendation.periodEnd} (${recommendation.forecastDays} days)
-- Total Reference Evapotranspiration (ET0): ${(recommendation.schedule || []).reduce((acc, s) => acc + s.et0Mm, 0).toFixed(1)} mm
-- Total Crop Evapotranspiration (ETc): ${recommendation.totalEtcMm} mm
-- Forecast Rainfall: ${recommendation.totalPrecipitationMm} mm (Effective Recharge: ${recommendation.totalEffectiveRainfallMm} mm)
-- Recommended Gross Irrigation Depth: ${recommendation.totalGrossIrrigationMm} mm
-- Total Water Volume: ${recommendation.totalVolumeM3.toLocaleString()} m³
-- Baseline Flood Volume: ${recommendation.baselineTotalVolumeM3.toLocaleString()} m³
-- Potential Water Savings: ${recommendation.potentialTotalSavingsM3.toLocaleString()} m³ (${recommendation.potentialSavingsPercentage}%)
-- Primary Action: ${recommendation.primaryAction.toUpperCase()}
-- Application Timing Recommendation: ${recommendation.recommendedWindowSummary}
-
-Format your response strictly as valid JSON with keys:
-{
-  "summary": "1-2 sentence core recommendation stating total mm and whether rainfall covers demand.",
-  "farmerAdvice": "Clear, direct guidance on when and how to apply water to prevent evaporative loss.",
-  "conservationImpact": "Concise statement on cubic meters saved compared to regional flood irrigation.",
-  "modelConfidence": "high"
-}
-`;
-
-      const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: 'application/json',
-              temperature: 0.2,
-            },
-          }),
-        }
-      );
-
-      if (geminiRes.ok) {
-        const geminiData = await geminiRes.json();
-        const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawText) {
-          const parsed = JSON.parse(rawText);
-          return {
-            summary: parsed.summary,
-            farmerAdvice: parsed.farmerAdvice,
-            conservationImpact: parsed.conservationImpact,
-            modelConfidence: parsed.modelConfidence || 'high',
-            source: 'gemini',
-          };
-        }
-      }
-    } catch (geminiError) {
-      console.warn('Gemini API call failed, using deterministic agronomist engine:', geminiError);
-    }
-  }
+  // Never call Gemini directly from the browser: all credentials stay server-only.
 
   // High-quality deterministic agronomic explanation fallback
   const rainCoversDemand = recommendation.totalEffectiveRainfallMm >= recommendation.totalEtcMm;
@@ -198,64 +126,7 @@ export async function getAgronomicChatReply(
     // Continue to direct client or fallback
   }
 
-  // 2. Direct client fallback
-  const apiKey =
-    typeof process !== 'undefined'
-      ? process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY
-      : undefined;
-
-  if (apiKey) {
-    try {
-      const systemInstruction = `
-You are an expert AI agricultural irrigation specialist serving farmers in Central Asia (Kazakhstan, Aral Sea Basin).
-Respond strictly in ${language === 'kk' ? 'Kazakh' : language === 'ru' ? 'Russian' : 'English'}.
-Keep responses concise (2-4 sentences max), highly practical, and rooted in FAO-56 irrigation principles.
-FARM CONTEXT:
-- Name: ${farm?.name || 'Central Asia Farm'}
-- Crop: ${farm?.cropType || 'cotton'}, Stage: ${farm?.growthStage || 'mid_season'}
-- Method: ${farm?.irrigationMethod || 'drip'}, Soil: ${farm?.soilType || 'loam'}
-- Area: ${farm?.fieldSizeHectares || 45} ha
-- Recommended Gross Irrigation: ${recommendation?.totalGrossIrrigationMm || 20} mm
-`;
-
-      const contents = [
-        ...(history || []).map((h) => ({
-          role: h.role === 'user' ? 'user' : 'model',
-          parts: [{ text: h.text }],
-        })),
-        {
-          role: 'user',
-          parts: [{ text: message }],
-        },
-      ];
-
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents,
-            systemInstruction: { parts: [{ text: systemInstruction }] },
-            generationConfig: {
-              temperature: 0.3,
-              maxOutputTokens: 500,
-            },
-          }),
-        }
-      );
-
-      if (res.ok) {
-        const data = await res.json();
-        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-        if (replyText) {
-          return { reply: replyText, source: 'gemini' };
-        }
-      }
-    } catch (err) {
-      console.warn('Gemini chat failed, fallback to algorithmic response:', err);
-    }
-  }
+  // Server route unavailable: use clearly labelled algorithmic fallback.
 
   // Rule-based fallback
   const lower = message.toLowerCase();

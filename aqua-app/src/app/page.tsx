@@ -18,7 +18,7 @@ import { FarmManagerModal } from '@/components/FarmManagerModal';
 import { DailyWeatherForecast, FarmProfile, IrrigationRecommendation, OnChainProof } from '@/lib/types';
 import { DEMO_FARM_TURKISTAN } from '@/lib/constants';
 import { calculateIrrigationRecommendation } from '@/lib/fao56';
-import { fetchOpenMeteoForecast, generateCentralAsiaFallbackForecast } from '@/lib/weather';
+import { generateCentralAsiaFallbackForecast } from '@/lib/weather';
 import { LanguageProvider, useTranslation, getCropLabel, getGrowthStageInfo } from '@/lib/i18n';
 import { WalletProvider } from '@/lib/wallet';
 import {
@@ -73,7 +73,18 @@ function DashboardApp() {
     setIsLoading(true);
     setWeatherError(null);
     try {
-      const weatherRes = await fetchOpenMeteoForecast(farm.latitude, farm.longitude);
+      const response = await fetch(
+        `/api/weather?lat=${encodeURIComponent(farm.latitude)}&lon=${encodeURIComponent(farm.longitude)}`,
+        { cache: 'no-store' }
+      );
+      if (!response.ok) throw new Error(`Weather API returned ${response.status}`);
+      const weatherRes = (await response.json()) as {
+        forecast: DailyWeatherForecast[];
+        source: 'live' | 'fallback';
+      };
+      if (!Array.isArray(weatherRes.forecast) || weatherRes.forecast.length === 0) {
+        throw new Error('No usable weather forecast available');
+      }
 
       setForecast(weatherRes.forecast);
       setWeatherSource(weatherRes.source);
