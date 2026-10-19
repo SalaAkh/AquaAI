@@ -17,17 +17,21 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: aqua-app/package-lock.json
 
       - name: Install dependencies
         working-directory: ./aqua-app
-        run: npm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund # TODO: regenerate legacy lockfile and restore npm ci
 
       - name: Run Agricultural Hydrology Tests
         working-directory: ./aqua-app
         run: npm test
+
+      - name: TypeScript typecheck
+        working-directory: ./aqua-app
+        run: npm run typecheck
 
       - name: Build Next.js Application
         working-directory: ./aqua-app

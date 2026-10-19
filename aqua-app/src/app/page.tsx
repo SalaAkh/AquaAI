@@ -12,6 +12,7 @@ import { AiAdvisorView } from '@/components/AiAdvisorView';
 import { FarmManagementView } from '@/components/FarmManagementView';
 import { WaterAnalyticsChart } from '@/components/WaterAnalyticsChart';
 import { IrrigationJournal } from '@/components/IrrigationJournal';
+import { TodayIrrigationCard } from '@/components/TodayIrrigationCard';
 import { SolanaVerifierCard } from '@/components/SolanaVerifierCard';
 import { WaterSubsidiesCard } from '@/components/WaterSubsidiesCard';
 import { CentralAsiaChallenge } from '@/components/CentralAsiaChallenge';
@@ -91,7 +92,7 @@ function DashboardApp() {
       setWeatherSource(weatherRes.source);
 
       // 2. Run FAO-56 calculations
-      const rec = calculateIrrigationRecommendation(farm, weatherRes.forecast);
+      const rec = calculateIrrigationRecommendation(farm, weatherRes.forecast, weatherRes.source);
       setRecommendation(rec);
       saveRecommendationToHistory(rec);
     } catch (err) {
@@ -100,7 +101,7 @@ function DashboardApp() {
       const fallbackWeather = generateCentralAsiaFallbackForecast(farm.latitude, farm.longitude);
       setForecast(fallbackWeather);
       setWeatherSource('fallback');
-      const rec = calculateIrrigationRecommendation(farm, fallbackWeather);
+      const rec = calculateIrrigationRecommendation(farm, fallbackWeather, 'fallback');
       setRecommendation(rec);
     } finally {
       setIsLoading(false);
@@ -292,6 +293,10 @@ function DashboardApp() {
               onRetry={() => loadAgronomicData(currentFarm)}
             />
 
+            {recommendation && (
+              <TodayIrrigationCard recommendation={recommendation} weatherSource={weatherSource} />
+            )}
+
             {/* 2. Irrigation Recommendation Card with Prominent “Calculate irrigation” Button */}
             {recommendation && (
               <IrrigationCalculatorCard
@@ -328,7 +333,7 @@ function DashboardApp() {
                 <SatelliteNdviCard
                   farm={currentFarm}
                   baselineKc={recommendation.schedule[0]?.kc ?? 1.15}
-                  onApplySatelliteKc={handleApplySatelliteKc}
+                  
                 />
                 <SoilMoistureSensorCard farm={currentFarm} />
               </div>
@@ -384,7 +389,7 @@ function DashboardApp() {
             <SatelliteNdviCard
               farm={currentFarm}
               baselineKc={recommendation.schedule[0]?.kc ?? 1.15}
-              onApplySatelliteKc={handleApplySatelliteKc}
+              
             />
             <SoilMoistureSensorCard farm={currentFarm} />
           </div>

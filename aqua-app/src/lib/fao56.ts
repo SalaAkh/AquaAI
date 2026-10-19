@@ -19,6 +19,9 @@ import {
  * - Above 2mm: ~75-80% infiltrates into root zone before surface runoff.
  */
 export function calculateEffectiveRainfall(precipitationMm: number): number {
+  if (!Number.isFinite(precipitationMm) || precipitationMm < 0) {
+    throw new RangeError('Precipitation must be a non-negative finite number');
+  }
   if (precipitationMm <= 1.5) {
     return 0;
   }
@@ -42,6 +45,10 @@ export function getCropCoefficient(crop: CropType, stage: GrowthStage): number {
  * 1 mm = 1 liter / m² = 10 m³ / hectare.
  */
 export function depthToVolumeM3(depthMm: number, areaHectares: number): number {
+  if (!Number.isFinite(depthMm) || depthMm < 0 ||
+    !Number.isFinite(areaHectares) || areaHectares < 0) {
+    throw new RangeError('Water depth and area must be non-negative finite numbers');
+  }
   return Number((depthMm * areaHectares * 10).toFixed(1));
 }
 
@@ -51,8 +58,20 @@ export function depthToVolumeM3(depthMm: number, areaHectares: number): number {
  */
 export function calculateIrrigationRecommendation(
   farm: FarmProfile,
-  forecast: DailyWeatherForecast[]
+  forecast: DailyWeatherForecast[],
+  weatherSource: 'live' | 'fallback' | 'unknown' = 'unknown'
 ): IrrigationRecommendation {
+  if (!Number.isFinite(farm.fieldSizeHectares) || farm.fieldSizeHectares <= 0) {
+    throw new RangeError('Field area must be a positive finite number');
+  }
+  if (!Array.isArray(forecast) || forecast.length === 0) {
+    throw new RangeError('A non-empty forecast is required');
+  }
+  if (farm.customEfficiency !== undefined &&
+      (!Number.isFinite(farm.customEfficiency) ||
+        farm.customEfficiency <= 0 || farm.customEfficiency > 1)) {
+    throw new RangeError('Irrigation efficiency must be between 0 and 1');
+  }
   const kc = getCropCoefficient(farm.cropType, farm.growthStage);
   const efficiency =
     farm.customEfficiency && farm.customEfficiency > 0 && farm.customEfficiency <= 1
@@ -71,6 +90,12 @@ export function calculateIrrigationRecommendation(
   let baselineTotalVolumeM3 = 0;
 
   forecast.forEach((day, index) => {
+    if (!Number.isFinite(day.et0Mm) || day.et0Mm < 0 ||
+        !Number.isFinite(day.precipitationMm) || day.precipitationMm < 0 ||
+        !Number.isFinite(day.tempMaxC) || typeof day.date !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(day.date)) {
+      throw new RangeError('Forecast contains invalid hydrological inputs');
+    }
     // 1. Crop Evapotranspiration: ETc = ET0 * Kc
     const etcMm = Number((day.et0Mm * kc).toFixed(2));
     totalEtcMm += etcMm;
@@ -99,32 +124,30 @@ export function calculateIrrigationRecommendation(
 
     const potentialSavingsM3 = Math.max(0, Number((baselineM3 - volumeM3).toFixed(1)));
 
-    // 7. Scheduling Logic & Best Window
+    // 7. Conservative daily advisory: ETc - effective rainfall describes
+    // modelled replacement demand, not the moisture content of the root zone.
+    // Never automatically postpone a positive deficit on the strength of
+    // tomorrow's rain alone: current stored soil water is unknown.
     let action: 'irrigate' | 'skip' | 'delay' = 'irrigate';
-    let actionReason = 'Crop evapotranspiration exceeds expected effective rainfall.';
-    let recommendedWindow = '05:30 - 08:30 (Morning low VPD window)';
-
-    // Check upcoming rain in the next 24-48 hours
+    let actionReason = 'Modelled crop water demand exceeds effective forecast rainfall. Check root-zone moisture before applying water.';
+    let recommendedWindow = '05:30 - 08:30 (illustrative: confirm local conditions)';
     const nextDayPrecip = forecast[index + 1]?.precipitationMm ?? 0;
 
-    if (effRainMm >= etcMm) {
+    if (netIrrigationMm === 0) {
       action = 'skip';
-      actionReason = `Natural precipitation (${day.precipitationMm} mm) satisfies or exceeds crop water demand.`;
-      recommendedWindow = 'No irrigation required';
+      actionReason = 'Effective rainfall meets modelled crop demand for this day; verify soil conditions.';
+      recommendedWindow = 'No replacement irrigation estimated';
+    } else if (netIrrigationMm < 1) {
+      actionReason = 'Small positive modelled demand: verify root-zone moisture before choosing to irrigate.';
+      recommendedWindow = 'Only after checking soil moisture';
     } else if (nextDayPrecip >= 8) {
-      action = 'delay';
-      actionReason = `Significant rain (${nextDayPrecip} mm) forecasted tomorrow. Delay to avoid deep percolation waste.`;
-      recommendedWindow = 'Delay until post-storm assessment';
-    } else if (netIrrigationMm < 1.0) {
-      action = 'delay';
-      actionReason = 'Small modelled deficit: check actual soil moisture before irrigating.';
-      recommendedWindow = 'No irrigation required';
+      actionReason = `Rain (${nextDayPrecip} mm) is forecast tomorrow, but soil storage is unknown; do not postpone irrigation automatically. Check moisture and update the forecast.`;
+      recommendedWindow = 'Confirm soil moisture and rain forecast';
     } else if (day.tempMaxC > 32) {
-      // High daytime heat in Central Asia: recommend night/evening irrigation to avoid massive evaporative loss
-      recommendedWindow = '20:30 - 23:30 (Night application to curb evaporative loss)';
+      recommendedWindow = '20:30 - 23:30 (illustrative cool-hour window)';
     }
 
-    const dateObj = new Date(day.date);
+    const dateObj = new Date(`${day.date}T12:00:00`);
     const dayLabel = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
     schedule.push({
@@ -157,9 +180,10 @@ export function calculateIrrigationRecommendation(
       : 0;
 
   // Determine aggregate recommendation
-  const irrigateDaysCount = schedule.filter((s) => s.action === 'irrigate').length;
+  const hasReplacementDemand = schedule.some((s) => s.netIrrigationMm >= 1);
+  const hasSmallDemand = schedule.some((s) => s.netIrrigationMm > 0);
   const primaryAction: 'irrigate' | 'skip' | 'monitor' =
-    irrigateDaysCount >= 3 ? 'irrigate' : irrigateDaysCount > 0 ? 'monitor' : 'skip';
+    hasReplacementDemand ? 'irrigate' : hasSmallDemand ? 'monitor' : 'skip';
 
   const periodStart = forecast[0]?.date ?? new Date().toISOString().split('T')[0];
   const periodEnd = forecast[forecast.length - 1]?.date ?? periodStart;
@@ -193,12 +217,18 @@ export function calculateIrrigationRecommendation(
       irrigationEfficiency: efficiency,
       effectiveRainfallFactor: 0.8,
       baselineMethod: 'Unlined canal / traditional furrow inundation (50% regional Central Asian efficiency benchmark)',
-      weatherSource: 'Open-Meteo High-Resolution Numerical Weather Prediction (ECMWF/GFS)',
+      weatherSource: weatherSource === 'live'
+        ? 'Open-Meteo forecast (model, not a field measurement)'
+        : weatherSource === 'fallback'
+        ? 'Synthetic illustrative weather scenario — not suitable for live irrigation decisions'
+        : 'Unverified input forecast — source not specified',
       faoStandard: 'FAO Irrigation and Drainage Paper No. 56 (Penman-Monteith Single Crop Coefficient)',
     },
     limitations: [
       'Assumes uniform soil infiltration and properly maintained irrigation emitters/nozzles.',
       'Does not account for unmeasured groundwater table capillary rise or localized soil salinity leaching requirements.',
+      'This daily replacement model does not measure soil water storage; do not treat it as an automatic irrigation order.',
+      'Effective rainfall is an illustrative heuristic, not a measured infiltration or a complete USDA SCS implementation.',
       'Subject to NWP forecast skill limitations beyond 72 hours.',
     ],
   };
