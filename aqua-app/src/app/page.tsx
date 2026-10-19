@@ -11,6 +11,7 @@ import { AiAdvisorCard } from '@/components/AiAdvisorCard';
 import { AiAdvisorView } from '@/components/AiAdvisorView';
 import { FarmManagementView } from '@/components/FarmManagementView';
 import { WaterAnalyticsChart } from '@/components/WaterAnalyticsChart';
+import { IrrigationJournal } from '@/components/IrrigationJournal';
 import { SolanaVerifierCard } from '@/components/SolanaVerifierCard';
 import { WaterSubsidiesCard } from '@/components/WaterSubsidiesCard';
 import { CentralAsiaChallenge } from '@/components/CentralAsiaChallenge';
@@ -300,6 +301,8 @@ function DashboardApp() {
                 isLoading={isLoading}
               />
             )}
+
+            {recommendation && <IrrigationJournal farm={currentFarm} recommendation={recommendation} />}
 
             {/* 3. Weather & Water Demand Analytics Chart */}
             {recommendation && (
