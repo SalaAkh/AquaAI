@@ -32,8 +32,77 @@ export interface FarmProfile {
   customEfficiency?: number;
   soilType: SoilType;
   isDemo?: boolean;
+  pumpProfileId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  phone?: string;
+  role: 'farmer' | 'agronomist' | 'admin' | 'demo';
+  preferredLanguage: 'ru' | 'kk' | 'en';
+  createdAt: string;
+}
+
+export interface PumpProfile {
+  id: string;
+  farmId: string;
+  userId?: string;
+  name: string;
+  flowRateM3H: number; // m³/hour
+  powerKw: number; // kW
+  energyType: 'electricity' | 'diesel' | 'solar' | 'gravity';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FieldProfile {
+  id: string;
+  farmId: string;
+  userId?: string;
+  pumpProfileId?: string;
+  name: string;
+  areaHectares: number;
+  cropType: CropType;
+  growthStage: GrowthStage;
+  irrigationMethod: IrrigationMethod;
+  customEfficiency?: number;
+  soilType: SoilType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type IrrigationMeasurementMethod = 'meter_diff' | 'pump_runtime' | 'manual_source';
+
+export interface IrrigationEntry {
+  id: string;
+  farmId: string;
+  fieldId?: string;
+  userId?: string;
+  date: string; // YYYY-MM-DD
+  time?: string; // HH:mm
+  actualM3: number;
+  method: IrrigationMeasurementMethod;
+  sourceTag: 'meter' | 'pump_estimate' | 'channel_coupon' | 'hydropost' | 'manual_estimate';
+  meterBefore?: number;
+  meterAfter?: number;
+  pumpFlowRate?: number;
+  pumpHours?: number;
+  pumpMinutes?: number;
+  notes: string;
+  savedAt: string;
+  updatedAt?: string;
+}
+
+export interface EconomicTariffs {
+  waterPricePerM3: number; // e.g. 25 KZT or $0.05
+  electricityPricePerKwh: number; // e.g. 28 KZT
+  dieselPricePerLiter: number; // e.g. 350 KZT
+  currency: 'KZT' | 'USD';
 }
 
 export interface DailyWeatherForecast {

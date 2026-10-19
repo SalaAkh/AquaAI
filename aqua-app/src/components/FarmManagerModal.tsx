@@ -15,6 +15,7 @@ import {
   getIrrigationMethodInfo,
   getSoilTypeInfo,
 } from '@/lib/i18n';
+import { savePumpProfile } from '@/lib/db-service';
 import { InteractiveFarmMap } from './InteractiveFarmMap';
 
 interface FarmManagerModalProps {
@@ -50,6 +51,12 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
   );
   const [soilType, setSoilType] = useState<SoilType>(initialFarm?.soilType || 'clay_loam');
 
+  // Pump specifications
+  const [pumpName, setPumpName] = useState('ЭЦВ-8 Насосная станция №1');
+  const [pumpFlowRate, setPumpFlowRate] = useState<number>(45);
+  const [pumpPowerKw, setPumpPowerKw] = useState<number>(18.5);
+  const [pumpEnergyType, setPumpEnergyType] = useState<'electricity' | 'diesel' | 'solar' | 'gravity'>('electricity');
+
   React.useEffect(() => {
     if (isOpen) {
       setName(initialFarm?.name || '');
@@ -75,8 +82,9 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
     e.preventDefault();
     if (!name.trim()) return;
 
+    const farmId = initialFarm?.id || `farm-${Date.now().toString(36)}`;
     const farm: FarmProfile = {
-      id: initialFarm?.id || `farm-${Date.now().toString(36)}`,
+      id: farmId,
       name: name.trim(),
       locationId: initialFarm?.locationId || 'custom-loc',
       locationName: regionName || 'Central Asia Agricultural Basin',
@@ -93,6 +101,21 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
       createdAt: initialFarm?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+
+    // Save pump equipment specifications
+    if (pumpName.trim() && pumpFlowRate > 0) {
+      savePumpProfile({
+        id: `pump-${farmId}`,
+        farmId,
+        name: pumpName.trim(),
+        flowRateM3H: pumpFlowRate,
+        powerKw: pumpPowerKw,
+        energyType: pumpEnergyType,
+        notes: `Насос для поля ${farm.name}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }).catch((e) => console.warn('Could not auto-save pump:', e));
+    }
 
     onSaveFarm(farm);
     onClose();
@@ -330,6 +353,75 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
                 );
               })}
             </select>
+          </div>
+
+          {/* Pump Equipment Specifications */}
+          <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Параметры насосного оборудования
+              </span>
+              <span className="text-[10px] text-slate-500 font-medium">Для расчёта объёма и ROI</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Марка / название насосной станции
+                </label>
+                <input
+                  type="text"
+                  value={pumpName}
+                  onChange={(e) => setPumpName(e.target.value)}
+                  placeholder="ЭЦВ-8, Rovatti TK, или погружной"
+                  className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Производительность подачи (м³/час)
+                </label>
+                <input
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  value={pumpFlowRate}
+                  onChange={(e) => setPumpFlowRate(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Мощность двигателя (кВт)
+                </label>
+                <input
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  value={pumpPowerKw}
+                  onChange={(e) => setPumpPowerKw(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Тип привода / энергоносителя
+                </label>
+                <select
+                  value={pumpEnergyType}
+                  onChange={(e) => setPumpEnergyType(e.target.value as any)}
+                  className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl cursor-pointer"
+                >
+                  <option value="electricity">Электросеть 380В</option>
+                  <option value="diesel">Дизельный генератор / ДВС</option>
+                  <option value="solar">Солнечная станция (СПЭС)</option>
+                  <option value="gravity">Самотёчный водовыпуск (без насоса)</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* Actions */}

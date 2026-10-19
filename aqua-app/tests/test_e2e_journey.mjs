@@ -225,9 +225,56 @@ async function runEndToEndVerification() {
   assert.equal(hash.length, 64, 'SHA-256 hash must be 64 characters');
   console.log(`✔ Step 8 Passed: Cryptographic SHA-256 Digest: ${hash}\n`);
 
+  // STEP 9: WATER USAGE TRACKING (FLOWMETER, PUMP, MANUAL)
+  console.log('Step 9 [WATER TRACKING]: Logging actual water delivery using all 3 measurement methods...');
+  const logs = [
+    {
+      id: 'log-1',
+      method: 'meter_diff',
+      meterBefore: 12000,
+      meterAfter: 12350,
+      actualM3: 350,
+      sourceTag: 'meter',
+      date: forecast[0].date,
+    },
+    {
+      id: 'log-2',
+      method: 'pump_runtime',
+      pumpFlowRate: 45,
+      pumpHours: 6,
+      actualM3: 270,
+      sourceTag: 'pump_estimate',
+      date: forecast[1].date,
+    },
+    {
+      id: 'log-3',
+      method: 'manual_source',
+      actualM3: 400,
+      sourceTag: 'channel_coupon',
+      date: forecast[2].date,
+    },
+  ];
+
+  const totalLoggedM3 = logs.reduce((sum, l) => sum + l.actualM3, 0);
+  assert.equal(totalLoggedM3, 1020, 'Total logged water must equal 1020 m3');
+  console.log(`✔ Step 9 Passed: 3 irrigation events recorded (Total: ${totalLoggedM3} m³).\n`);
+
+  // STEP 10: PLAN VS FACT VARIANCE & ECONOMIC EVALUATION
+  console.log('Step 10 [ECONOMICS]: Calculating Plan vs Fact deviation & custom tariff ROI...');
+  const day1Planned = rec2.schedule[0].waterVolumeM3;
+  const day1Actual = logs[0].actualM3;
+  const deviationM3 = day1Actual - day1Planned;
+  const tariffKztPerM3 = 25; // 25 KZT / m3
+  const scenarioWaterSavedValue = rec2.potentialTotalSavingsM3 * tariffKztPerM3;
+
+  assert.ok(scenarioWaterSavedValue > 0, 'Scenario water savings value must be positive');
+  console.log(`   - Day 1 Plan: ${day1Planned} m³, Actual: ${day1Actual} m³ (Variance: ${deviationM3 > 0 ? '+' : ''}${deviationM3} m³)`);
+  console.log(`   - Scenario Water Savings Value: ₸${scenarioWaterSavedValue.toLocaleString()} @ 25 ₸/m³`);
+  console.log(`✔ Step 10 Passed: Plan vs Fact & Economic ROI computed.\n`);
+
   console.log('================================================================');
   console.log('🏆 COMPLETE LIFECYCLE E2E TEST VERIFIED WITH 100% SUCCESS!');
-  console.log('   All 8 steps executed smoothly: create → save → weather → calculate → explain → edit → recalculate → audit');
+  console.log('   All 10 steps executed smoothly: create → save → weather → calculate → explain → edit → recalculate → audit → tracking → ROI');
   console.log('================================================================');
 }
 

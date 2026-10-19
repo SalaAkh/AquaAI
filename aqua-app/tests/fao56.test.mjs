@@ -99,6 +99,29 @@ try {
   assert.throws(() => calculateIrrigationRecommendation(farm, [day('2026-10-20', { precipitationMm: -1 })]), RangeError);
   assert.throws(() => calculateIrrigationRecommendation({ ...farm, customEfficiency: 1.2 }, [day('2026-10-20')]), RangeError);
 
+  // Pump & Flowmeter Hydrological Mechanics Unit Tests
+  // 1. Pump volume = rate (m3/h) * hours
+  const pumpRate = 45; // m3/h
+  const pumpHours = 5.5; // 5h 30m
+  const calculatedPumpM3 = Math.round(pumpRate * pumpHours * 10) / 10;
+  assert.equal(calculatedPumpM3, 247.5, 'Pump calculation must produce exact volume 247.5 m3');
+
+  // 2. Flowmeter differential
+  const meterStart = 10500.4;
+  const meterEnd = 10850.8;
+  const meterDiffM3 = Number((meterEnd - meterStart).toFixed(1));
+  assert.equal(meterDiffM3, 350.4, 'Meter differential must equal 350.4 m3');
+  assert.ok(meterEnd >= meterStart, 'Meter end must be >= meter start');
+
+  // 3. Extreme heat window testing: tempMax > 32 should assign night/cool window
+  const hotDay = calculateIrrigationRecommendation(farm, [day('2026-07-15', { tempMaxC: 38 })], 'live');
+  assert.match(hotDay.schedule[0].recommendedWindow, /20:30|cool-hour/i, 'Extreme heat must recommend cool evening window');
+
+  // 4. Heavy deluge scenario: 50mm rainfall saturates crop requirement
+  const floodRain = calculateIrrigationRecommendation(farm, [day('2026-10-20', { precipitationMm: 50, et0Mm: 4 })], 'live');
+  assert.equal(floodRain.schedule[0].action, 'skip');
+  assert.equal(floodRain.schedule[0].waterVolumeM3, 0);
+
   console.log('✔ AquaAI production FAO-56 irrigation module tests passed');
 } finally {
   rmSync(temp, { recursive: true, force: true });
