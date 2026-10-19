@@ -118,25 +118,13 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Instant simulated Devnet keypair for testing
   const connectSimulatedWallet = () => {
-    // Generate or retrieve stored demo keypair
-    const stored = localStorage.getItem('aqua_sim_wallet');
-    let kp: Keypair;
-    if (stored) {
-      try {
-        kp = Keypair.fromSecretKey(new Uint8Array(JSON.parse(stored)));
-      } catch {
-        kp = Keypair.generate();
-        localStorage.setItem('aqua_sim_wallet', JSON.stringify(Array.from(kp.secretKey)));
-      }
-    } else {
-      kp = Keypair.generate();
-      localStorage.setItem('aqua_sim_wallet', JSON.stringify(Array.from(kp.secretKey)));
-    }
+    // Ephemeral demo key: do not persist secret keys to localStorage.
+    const kp = Keypair.generate();
 
     setSimulatedKeypair(kp);
     const pubkeyStr = kp.publicKey.toBase58();
     setPublicKey(pubkeyStr);
-    setWalletName('Devnet Farmer Wallet');
+    setWalletName('Temporary Demo Wallet');
     fetchBalance(pubkeyStr);
   };
 

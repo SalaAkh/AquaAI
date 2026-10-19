@@ -28,7 +28,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
   const [showCertificate, setShowCertificate] = useState(false);
 
   // KZT subsidy calculation: ~65 KZT saved per m³ of water saved in Southern Kazakhstan
-  const KZT_PER_M3 = 65;
+  const KZT_PER_M3 = 65; // Hypothetical scenario; not an official subsidy or tariff
   const sevenDaySavedM3 = recommendation.potentialTotalSavingsM3;
   const sevenDaySavingsKzt = Math.round(sevenDaySavedM3 * KZT_PER_M3);
 
@@ -50,13 +50,13 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200/80 mb-2">
             <Coins className="w-3.5 h-3.5" />
-            <span>{t.subsidiesTitle}</span>
+            <span>{language === 'ru' ? 'Модельный сценарий экономии' : language === 'kk' ? 'Үнемдеудің модельдік сценарийі' : 'Illustrative savings scenario'}</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             {t.subsidiesTitle}
           </h2>
           <p className="text-sm text-slate-500 mt-1 max-w-2xl">
-            {t.subsidiesSubtitle}
+            {language === 'ru' ? 'Демонстрационная оценка по условной ставке 65 ₸/м³, не государственная субсидия.' : 'Model-only estimate at a hypothetical 65 KZT/m³, not an official subsidy.'}
           </p>
         </div>
 
@@ -74,7 +74,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
         {/* Metric 1: 7-day savings in KZT */}
         <div className="bg-gradient-to-br from-emerald-50/70 to-teal-50/40 rounded-2xl p-5 border border-emerald-100">
           <div className="flex items-center justify-between text-xs font-semibold text-emerald-800 mb-2">
-            <span>{t.calcSavingsKzt}</span>
+            <span>{language === 'ru' ? 'Условная стоимость экономии' : 'Illustrative savings value'}</span>
             <TrendingUp className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-emerald-950">
@@ -120,7 +120,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
               <FileCheck2 className="w-5 h-5 text-emerald-600" />
-              <span>{t.certTitle}</span>
+              <span>{language === 'ru' ? 'РАСЧЁТНЫЙ ОТЧЁТ — НЕ СЕРТИФИКАТ' : 'MODEL REPORT — NOT A CERTIFICATE'}</span>
             </h3>
             <button
               onClick={handlePrint}
@@ -148,7 +148,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
 
               <div>
                 <p className="text-xs font-bold tracking-widest text-amber-700 uppercase">
-                  {t.certMinistry}
+                  AquaAI DEMO — Not issued by any government agency
                 </p>
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1 uppercase tracking-tight">
                   {t.certTitle}
@@ -217,7 +217,7 @@ export const WaterSubsidiesCard: React.FC<WaterSubsidiesCardProps> = ({
                 <div className="text-right">
                   <div className="font-semibold text-slate-800">{t.certEngine}</div>
                   <div className="text-[10px] text-slate-400">FAO-56 Penman-Monteith Verification</div>
-                  <div className="text-[10px] text-emerald-600 font-medium">{t.certStatus}</div>
+                  <div className="text-[10px] text-emerald-600 font-medium">Modelled estimate only, not an independently verified measurement</div>
                 </div>
               </div>
             </div>

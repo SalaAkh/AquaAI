@@ -11,6 +11,7 @@ import { AiAdvisorCard } from '@/components/AiAdvisorCard';
 import { AiAdvisorView } from '@/components/AiAdvisorView';
 import { FarmManagementView } from '@/components/FarmManagementView';
 import { WaterAnalyticsChart } from '@/components/WaterAnalyticsChart';
+import { IrrigationJournal } from '@/components/IrrigationJournal';
 import { SolanaVerifierCard } from '@/components/SolanaVerifierCard';
 import { WaterSubsidiesCard } from '@/components/WaterSubsidiesCard';
 import { CentralAsiaChallenge } from '@/components/CentralAsiaChallenge';
@@ -18,7 +19,7 @@ import { FarmManagerModal } from '@/components/FarmManagerModal';
 import { DailyWeatherForecast, FarmProfile, IrrigationRecommendation, OnChainProof } from '@/lib/types';
 import { DEMO_FARM_TURKISTAN } from '@/lib/constants';
 import { calculateIrrigationRecommendation } from '@/lib/fao56';
-import { fetchOpenMeteoForecast, generateCentralAsiaFallbackForecast } from '@/lib/weather';
+import { generateCentralAsiaFallbackForecast } from '@/lib/weather';
 import { LanguageProvider, useTranslation, getCropLabel, getGrowthStageInfo } from '@/lib/i18n';
 import { WalletProvider } from '@/lib/wallet';
 import {
@@ -73,7 +74,18 @@ function DashboardApp() {
     setIsLoading(true);
     setWeatherError(null);
     try {
-      const weatherRes = await fetchOpenMeteoForecast(farm.latitude, farm.longitude);
+      const response = await fetch(
+        `/api/weather?lat=${encodeURIComponent(farm.latitude)}&lon=${encodeURIComponent(farm.longitude)}`,
+        { cache: 'no-store' }
+      );
+      if (!response.ok) throw new Error(`Weather API returned ${response.status}`);
+      const weatherRes = (await response.json()) as {
+        forecast: DailyWeatherForecast[];
+        source: 'live' | 'fallback';
+      };
+      if (!Array.isArray(weatherRes.forecast) || weatherRes.forecast.length === 0) {
+        throw new Error('No usable weather forecast available');
+      }
 
       setForecast(weatherRes.forecast);
       setWeatherSource(weatherRes.source);
@@ -146,21 +158,24 @@ function DashboardApp() {
         ...day,
         kc: adjustedKc,
         etcMm: etc,
+        netIrrigationMm: net,
         grossIrrigationMm: gross,
         waterVolumeM3: vol,
       };
     });
 
     const totalEtc = Number(updatedSchedule.reduce((a, s) => a + s.etcMm, 0).toFixed(1));
+    const totalNet = Number(updatedSchedule.reduce((a, s) => a + s.netIrrigationMm, 0).toFixed(1));
     const totalGross = Number(updatedSchedule.reduce((a, s) => a + s.grossIrrigationMm, 0).toFixed(1));
     const totalVol = Math.round(updatedSchedule.reduce((a, s) => a + s.waterVolumeM3, 0));
     const baselineVol = recommendation.baselineTotalVolumeM3;
     const savingsVol = Math.max(0, baselineVol - totalVol);
-    const savingsPct = Math.round((savingsVol / baselineVol) * 100);
+    const savingsPct = baselineVol > 0 ? Math.round((savingsVol / baselineVol) * 100) : 0;
 
     const updatedRec: IrrigationRecommendation = {
       ...recommendation,
       totalEtcMm: totalEtc,
+      totalNetIrrigationMm: totalNet,
       totalGrossIrrigationMm: totalGross,
       totalVolumeM3: totalVol,
       potentialTotalSavingsM3: savingsVol,
@@ -286,6 +301,8 @@ function DashboardApp() {
                 isLoading={isLoading}
               />
             )}
+
+            {recommendation && <IrrigationJournal farm={currentFarm} recommendation={recommendation} />}
 
             {/* 3. Weather & Water Demand Analytics Chart */}
             {recommendation && (

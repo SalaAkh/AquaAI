@@ -189,12 +189,12 @@ export async function verifyOnChainSignature(
     const memoLog = logs.find((l) => l.includes('AQUA-AI:V1:'));
     const hashPrefix = expectedHash.slice(0, 32);
 
-    const match = memoLog ? memoLog.includes(hashPrefix) : true;
+    const match = !tx.meta?.err && /^[0-9a-f]{64}$/i.test(expectedHash) && Boolean(memoLog?.includes(hashPrefix));
 
     return {
       isValid: match,
       slot: tx.slot,
-      memoFound: memoLog || 'Memo Verified in instruction data',
+      memoFound: memoLog,
     };
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : String(err);
