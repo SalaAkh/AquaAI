@@ -64,3 +64,11 @@ Thumbs.db
 *.bak
 *.swp
 
+# Video generation temporary clips & concat lists
+part_*.mp4
+demo_audio_*.mp3
+pitch_audio_*.mp3
+*_concat.txt
+rendered_*.png
+demo_scene_*.png
+

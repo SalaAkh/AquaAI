@@ -40,6 +40,7 @@
 
 - 🌐 **[Онлайн Демо Сайт (Live Preview)](https://aqua-ai-demo.loca.lt)** *(Туннель запущен прямо сейчас)*
 - 🚀 **[Развернуть в 1 клик на Vercel (Production)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&project-name=aqua-ai&root-directory=aqua-app)**
+- 🎬 **[Материалы питча и видео (Media Hub)](media/pitch/README.md)**
 - 📁 **[Репозиторий GitHub](https://github.com/SalaAkh/AquaAI)**
 - 📑 **[Архитектура и формулы](#-научный-агрономический-движок-fao-56)**
 
