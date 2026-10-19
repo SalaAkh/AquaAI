@@ -11,7 +11,8 @@
     "test": "node tests/fao56.test.mjs",
     "test:e2e": "node tests/test_e2e_journey.mjs",
     "firebase:login": "npx firebase-tools login",
-    "firebase:deploy": "npx firebase-tools deploy --only hosting"
+    "firebase:deploy": "npx firebase-tools deploy --only hosting",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@solana/web3.js": "^1.99.0",

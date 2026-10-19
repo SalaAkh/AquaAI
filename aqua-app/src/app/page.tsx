@@ -91,7 +91,7 @@ function DashboardApp() {
       setWeatherSource(weatherRes.source);
 
       // 2. Run FAO-56 calculations
-      const rec = calculateIrrigationRecommendation(farm, weatherRes.forecast);
+      const rec = calculateIrrigationRecommendation(farm, weatherRes.forecast, weatherRes.source);
       setRecommendation(rec);
       saveRecommendationToHistory(rec);
     } catch (err) {
@@ -100,7 +100,7 @@ function DashboardApp() {
       const fallbackWeather = generateCentralAsiaFallbackForecast(farm.latitude, farm.longitude);
       setForecast(fallbackWeather);
       setWeatherSource('fallback');
-      const rec = calculateIrrigationRecommendation(farm, fallbackWeather);
+      const rec = calculateIrrigationRecommendation(farm, fallbackWeather, 'fallback');
       setRecommendation(rec);
     } finally {
       setIsLoading(false);
