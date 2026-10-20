@@ -198,7 +198,7 @@ function DashboardApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-cyan-100 selection:text-cyan-900">
+    <div className="min-h-screen min-w-0 overflow-x-clip flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-cyan-100 selection:text-cyan-900">
       {/* Top Navbar */}
       <Navbar
         currentFarm={currentFarm}
@@ -232,16 +232,16 @@ function DashboardApp() {
       )}
 
       {/* Main Container */}
-      <main id="dashboard-content" className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main id="dashboard-content" className="flex-1 min-w-0 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 pb-28 sm:pb-8 space-y-5 sm:space-y-8">
         {/* Active Farm Header Bar (Always visible for clarity and quick navigation) */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-4 sm:p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 p-3 sm:p-5 shadow-xs flex flex-wrap items-center justify-between gap-3 sm:gap-4">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-50 to-emerald-50 text-sky-800 flex items-center justify-center font-bold text-xl border border-sky-100 shadow-2xs">
               {currentFarm.cropType === 'cotton' ? '🌱' : currentFarm.cropType === 'wheat' ? '🌾' : currentFarm.cropType === 'rice' ? '🌾' : '🌽'}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-black text-slate-900">
+                <h1 className="text-sm sm:text-lg font-black text-slate-900 break-words">
                   {currentFarm.id === DEMO_FARM_TURKISTAN.id ? t.demoTurkistanName : currentFarm.name}
                 </h1>
                 {currentFarm.isDemo ? (
@@ -282,7 +282,7 @@ function DashboardApp() {
               className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 transition-colors disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{t.refreshWeatherBtn}</span>
+              <span>{t.refreshWeatherBtn}</span>
             </button>
           </div>
         </div>
