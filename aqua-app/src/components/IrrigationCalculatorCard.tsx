@@ -245,7 +245,7 @@ export const IrrigationCalculatorCard: React.FC<IrrigationCalculatorCardProps> =
           </button>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="min-w-[670px] w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 text-slate-500">
                 <th className="pb-2.5 font-semibold">{t.dayHeader}</th>

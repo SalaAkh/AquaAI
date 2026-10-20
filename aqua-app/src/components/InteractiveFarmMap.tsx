@@ -218,7 +218,7 @@ export const InteractiveFarmMap: React.FC<InteractiveFarmMapProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="relative w-full h-72 sm:h-80 rounded-2xl overflow-hidden border border-slate-200/90 shadow-inner bg-slate-100 select-none cursor-crosshair group"
+        className="relative w-full h-56 min-[400px]:h-64 sm:h-80 rounded-2xl overflow-hidden border border-slate-200/90 shadow-inner bg-slate-100 select-none cursor-crosshair group"
       >
         {/* Render OpenStreetMap Slippy Tiles */}
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -365,7 +365,7 @@ export const InteractiveFarmMap: React.FC<InteractiveFarmMapProps> = ({
           <span className="text-[11px] text-slate-500 font-mono">WGS-84</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 min-[390px]:grid-cols-2 gap-3">
           <div>
             <label htmlFor="manual-latitude" className="block text-[11px] font-semibold text-slate-600 mb-1">
               Latitude (°N)

@@ -135,8 +135,8 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
   const currentKc = FAO_CROP_COEFFICIENTS[cropType]?.[growthStage] ?? 1.0;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[70] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="relative flex flex-col w-full max-w-2xl max-h-[100dvh] sm:max-h-[94dvh] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/70">
           <div className="flex items-center gap-2.5">
@@ -159,7 +159,7 @@ export const FarmManagerModal: React.FC<FarmManagerModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 flex-1 min-h-0 overflow-y-auto overscroll-contain">
           {/* Farm Name */}
           <div>
             <label htmlFor="farm-name" className="block text-xs font-bold text-slate-700 mb-1">

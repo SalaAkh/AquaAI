@@ -16,6 +16,8 @@ import {
   Sparkles,
   User,
   Database,
+  Menu,
+  X,
 } from 'lucide-react';
 import { FarmProfile } from '@/lib/types';
 import { useTranslation } from '@/lib/i18n';
@@ -53,6 +55,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { t, language, setLanguage } = useTranslation();
   const { user, isDemo, isCloudConnected } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const selectMobileTab = (tab: NavTabType) => { setActiveTab(tab); setMobileMenuOpen(false); };
   const {
     publicKey,
     shortAddress,
@@ -75,13 +79,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs transition-all">
+    <header className="sticky top-0 z-50 bg-white/95 sm:backdrop-blur-md border-b border-slate-200/90 shadow-2xs transition-all">
       {/* TIER 1: Main Brand, Active Farm, Web3 Wallet & Global Tools */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+        <div className="flex items-center justify-between min-h-16 gap-2 py-2 sm:py-0 sm:h-16">
           {/* Brand Logo & Slogan */}
           <div
-            className="flex items-center gap-3 cursor-pointer shrink-0"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0"
             onClick={() => setActiveTab('dashboard')}
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 via-cyan-500 to-emerald-400 p-0.5 shadow-md shadow-sky-500/20 flex items-center justify-center">
@@ -93,7 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center gap-1.5">
                 <span className="text-xl font-black tracking-tight text-slate-900">Aqua</span>
                 <span className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-emerald-600">AI</span>
-                <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                <span className="hidden sm:inline text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                   DEVNET
                 </span>
               </div>
@@ -104,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Right Controls: Farm Selector + Add Field + Wallet + Language */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+          <div className="hidden sm:flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
             {/* Active Farm Dropdown */}
             <div className="relative">
               <select
@@ -231,8 +235,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
+      <div className="sm:hidden flex items-center gap-2 px-4 pb-2">
+        <select aria-label="Активное поле" value={currentFarm.id}
+          onChange={e => { const f = farms.find(x => x.id === e.target.value); if (f) onSelectFarm(f); }}
+          className="flex-1 min-w-0 h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold">
+          {farms.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+        </select>
+        <button type="button" aria-label="Добавить поле" onClick={onOpenNewFarmModal}
+          className="h-11 w-11 shrink-0 grid place-items-center rounded-xl bg-slate-900 text-white"><Plus className="w-5 h-5"/></button>
+        <button type="button" aria-label="Открыть меню" onClick={() => setMobileMenuOpen(true)}
+          className="h-11 w-11 shrink-0 grid place-items-center rounded-xl border border-slate-200"><Menu className="w-5 h-5"/></button>
+      </div>
       {/* TIER 2: Dedicated Module Navigation Bar with Icons & Breathing Room */}
-      <div className="border-t border-slate-200/70 bg-slate-50/70">
+      <div className="hidden sm:block border-t border-slate-200/70 bg-slate-50/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-1.5 overflow-x-auto py-2 scrollbar-none">
             {navItems.map((item) => {
@@ -257,6 +272,39 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
+      <nav aria-label="Мобильная навигация" className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200 px-2 pt-1" style={{paddingBottom:'max(.35rem, env(safe-area-inset-bottom))'}}>
+        <div className="grid grid-cols-5 gap-1">
+          {(['dashboard','farms','advisor','analytics'] as NavTabType[]).map(id => {
+            const item = navItems.find(n => n.id === id)!;
+            const Icon = item.icon;
+            return <button type="button" key={id} onClick={() => selectMobileTab(id)}
+              aria-current={activeTab === id ? 'page' : undefined}
+              className={`min-h-14 min-w-0 flex flex-col items-center justify-center gap-1 rounded-xl ${activeTab === id ? 'bg-sky-50 text-sky-800' : 'text-slate-600'}`}>
+              <Icon className="w-5 h-5"/><span className="max-w-full truncate text-[10px] font-semibold">{id === 'dashboard' ? 'Главная' : id === 'farms' ? 'Поля' : id === 'advisor' ? 'AI' : 'Аналитика'}</span>
+            </button>;
+          })}
+          <button type="button" onClick={() => setMobileMenuOpen(true)} className="min-h-14 flex flex-col items-center justify-center gap-1 text-slate-600">
+            <Menu className="w-5 h-5"/><span className="text-[10px] font-semibold">Ещё</span>
+          </button>
+        </div>
+      </nav>
+      {mobileMenuOpen && <div className="sm:hidden fixed inset-0 z-[60]">
+        <button type="button" aria-label="Закрыть меню" onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-slate-950/60"/>
+        <div role="dialog" aria-modal="true" aria-label="Меню AquaAI" className="absolute right-0 top-0 bottom-0 w-[min(21rem,90vw)] overflow-y-auto bg-white p-5 shadow-2xl">
+          <div className="flex items-center justify-between mb-5"><span className="font-black text-xl">AquaAI</span>
+            <button type="button" aria-label="Закрыть меню" onClick={() => setMobileMenuOpen(false)} className="h-11 w-11 rounded-xl bg-slate-100 grid place-items-center"><X className="w-5 h-5"/></button>
+          </div>
+          {navItems.map(item => { const Icon=item.icon; return <button type="button" key={item.id} onClick={() => selectMobileTab(item.id)}
+            className={`w-full min-h-12 flex items-center gap-3 px-3 rounded-xl text-sm font-semibold ${activeTab === item.id ? 'bg-sky-50 text-sky-900' : 'text-slate-700'}`}>
+            <Icon className="w-5 h-5"/>{item.label}</button>; })}
+          <div className="mt-5 pt-4 border-t border-slate-200">
+            <button type="button" onClick={() => { setMobileMenuOpen(false); setIsAuthModalOpen(true); }}
+              className="w-full min-h-12 rounded-xl bg-slate-900 text-white text-sm font-bold">{user ? 'Профиль' : 'Войти / Демо'}</button>
+            <div className="flex gap-2 mt-3">{(['ru','kk','en'] as const).map(l=><button type="button" key={l} onClick={() => setLanguage(l)}
+              className={`flex-1 h-11 rounded-xl border text-xs font-bold ${language===l ? 'bg-sky-50 border-sky-500 text-sky-900' : 'border-slate-200'}`}>{l==='kk' ? 'ҚАЗ' : l.toUpperCase()}</button>)}</div>
+          </div>
+        </div>
+      </div>}
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </header>
   );
