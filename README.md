@@ -40,6 +40,7 @@
 
 - 📋 **[Материалы для IDEA MINERS 2026 (Pitch Deck, Скрипты, Ответы жюри)](docs/IDEA_MINERS_SUBMISSION.md)**
 - 🗄️ **[Руководство по настройке Supabase PostgreSQL (RLS)](docs/SUPABASE_SETUP.md)**
+- 🟢 **[Постоянный хостинг 24/7: инструкция Vercel](docs/DEPLOYMENT_24_7.md)**
 - 🚀 **[Развернуть в 1 клик на Vercel (Production)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&project-name=aqua-ai&root-directory=aqua-app)**
 - 🎬 **[Материалы питча и медиа (Media Hub)](media/pitch/README.md)**
 - 📁 **[Репозиторий GitHub](https://github.com/SalaAkh/AquaAI)**
@@ -143,6 +144,8 @@ flowchart TD
 ## 🚀 Как запустить сайт онлайн (Deployment Options)
 
 ### Вариант 1: Развертывание в 1 клик на Vercel (Самый быстрый и надежный способ)
+
+**Внимание:** для корректной работы Next.js SSR/API в Vercel обязательно укажите **Root Directory = `aqua-app`**. Подробные инструкции по переменным окружения, постоянному домену, мониторингу и проверке доступны в [DEPLOYMENT_24_7.md](docs/DEPLOYMENT_24_7.md).
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FSalaAkh%2FAquaAI&project-name=aqua-ai&root-directory=aqua-app)
 
