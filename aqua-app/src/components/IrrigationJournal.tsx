@@ -352,7 +352,7 @@ export const IrrigationJournal: React.FC<IrrigationJournalProps> = ({
       </div>
 
       {/* Aggregate KPI Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 min-[390px]:grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80">
           <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Всего внесено</div>
           <div className="mt-1 text-xl sm:text-2xl font-black text-slate-900">
@@ -393,7 +393,7 @@ export const IrrigationJournal: React.FC<IrrigationJournalProps> = ({
       </div>
 
       {/* Input Mode Selector Tabs */}
-      <div id="irrigation-entry-form" className="bg-slate-50/80 rounded-2xl p-5 border border-slate-200 space-y-4">
+      <div id="irrigation-entry-form" className="bg-slate-50/80 rounded-2xl p-3 sm:p-5 border border-slate-200 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <Plus className="w-3.5 h-3.5 text-sky-600" />
@@ -726,8 +726,8 @@ export const IrrigationJournal: React.FC<IrrigationJournalProps> = ({
             В журнале пока нет записей о поливе. Используйте форму выше, чтобы зафиксировать первый полив.
           </div>
         ) : (
-          <div className="overflow-x-auto border border-slate-200 rounded-2xl">
-            <table className="w-full text-xs text-left">
+          <div className="overflow-x-auto max-w-full border border-slate-200 rounded-2xl">
+            <table className="min-w-[650px] w-full text-xs text-left">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                 <tr>
                   <th className="py-3 px-4">Дата и время</th>
