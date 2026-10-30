@@ -31,7 +31,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
       {/* Subtle background glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-96 bg-gradient-to-br from-sky-200/30 via-emerald-100/20 to-transparent blur-3xl pointer-events-none -z-10" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 lg:pt-16 lg:pb-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-7 pb-9 sm:pt-12 sm:pb-16 lg:pt-16 lg:pb-24">
         {/* Top Announcement Pill */}
         <div className="flex justify-center mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-sky-200 shadow-xs text-xs font-medium text-slate-700">
@@ -44,7 +44,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
 
         {/* Hero Heading & Subtitle */}
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
             {t.heroTitle} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-600 via-teal-600 to-emerald-600">
               {t.heroHighlight}
@@ -55,7 +55,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
           </p>
 
           {/* Action CTAs */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+          <div className="mt-7 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4">
             <button
               onClick={onLaunchDashboard}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 active:scale-98 transition-all shadow-md shadow-slate-950/10"
@@ -73,7 +73,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
         </div>
 
         {/* Interactive Hero Preview Card */}
-        <div className="mt-14 max-w-5xl mx-auto">
+        <div className="mt-8 sm:mt-14 max-w-5xl mx-auto">
           <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-4 sm:p-6 shadow-xl shadow-slate-900/5 backdrop-blur-sm">
             <div className="flex flex-wrap items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div className="flex items-center gap-2.5">

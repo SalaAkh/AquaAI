@@ -242,7 +242,7 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
 
       {/* View: 7-Day Micro Cards */}
       {viewMode === 'cards' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+        <div className="grid grid-flow-col auto-cols-[minmax(112px,40%)] sm:grid-flow-row sm:grid-cols-4 md:grid-cols-7 gap-2 overflow-x-auto sm:overflow-visible pb-3 sm:pb-0 snap-x snap-mandatory">
           {forecast.map((day, idx) => {
             const dayName = getLocalizedDayName(day.date, language, idx === 0);
             const dateObj = new Date(day.date);
@@ -251,7 +251,7 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
             return (
               <div
                 key={day.date}
-                className={`p-3 rounded-2xl border text-center transition-all ${
+                className={`snap-start p-3 rounded-2xl border text-center transition-all ${
                   idx === 0
                     ? 'bg-sky-50/70 border-sky-300 ring-1 ring-sky-300 shadow-2xs'
                     : 'bg-white border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/60'
@@ -284,7 +284,7 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({
       ) : (
         /* View: Forecast Chart Visualizer (Rainfall & Temperature Curve) */
         <div className="p-4 rounded-2xl bg-slate-50/60 border border-slate-200/80 space-y-4">
-          <div className="flex items-center justify-between text-xs text-slate-600">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
             <span className="font-bold text-slate-800">7-Day Rainfall &amp; Temperature Profile</span>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">

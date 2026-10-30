@@ -238,7 +238,7 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
         </div>
 
         {/* Bars Container */}
-        <div className="grid grid-cols-7 gap-2 sm:gap-4 h-64 items-end pt-6 pb-2 px-2 border-b border-slate-200">
+        <div className="grid grid-cols-7 gap-1 sm:gap-4 h-64 items-end pt-6 pb-2 px-2 border-b border-slate-200">
           {schedule.map((day) => {
             const baselineHeight = maxVolume > 0 ? (day.baselineVolumeM3 / maxVolume) * 100 : 0;
             const volumeHeight = maxVolume > 0 ? (day.waterVolumeM3 / maxVolume) * 100 : 0;
@@ -321,7 +321,7 @@ export const WaterAnalyticsChart: React.FC<WaterAnalyticsChartProps> = ({
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <table className="min-w-[650px] w-full text-xs text-left bg-white rounded-xl border border-slate-200 overflow-hidden">
               <thead className="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
                 <tr>
                   <th className="py-2.5 px-3">Дата</th>

@@ -59,6 +59,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Native phone viewport comfort rules. Included on every prebuild. */
+@media (max-width: 639px) {
+  html, body { max-width: 100%; overflow-x: clip; }
+  button, select, input, textarea { touch-action: manipulation; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea, select { font-size: 16px; }
+  #dashboard-content { scroll-margin-top: 7rem; }
+  #irrigation-entry-form, #irrigation-tracking-section { scroll-margin-top: 8rem; }
+}
 /* Glassmorphism & card elevation */
 .card-glass {
   background: rgba(255, 255, 255, 0.85);
